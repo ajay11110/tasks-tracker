@@ -1,0 +1,1471 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tast Tracker</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #5b8e7d;
+            --primary-light: #e8f5e9;
+            --bg: #f4f7f6;
+            --card: #ffffff;
+            --text: #333;
+            --border: #ddd;
+        }
+
+        body.dark-mode {
+            --bg: #121212;
+            --card: #1e1e1e;
+            --text: #e0e0e0;
+            --border: #333;
+            --primary-light: #2a2a2a;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 10px;
+            transition: 0.3s;
+            padding-bottom: 50px;
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .btn-icon {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .btn-danger {
+            background: #ff5f5f;
+            color: white;
+            border: none;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .section-title {
+            border-left: 4px solid var(--primary);
+            padding-left: 10px;
+            margin: 15px 0;
+            color: var(--primary);
+            font-size: 1.1rem;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .date-label {
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: var(--text);
+            min-width: 160px;
+            text-align: center;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        .manager-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+            font-size: 0.85rem;
+        }
+
+        .manager-table th,
+        .manager-table td {
+            padding: 10px;
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .manager-table th {
+            background: var(--primary-light);
+        }
+
+        .task-input {
+            width: 100%;
+            border: none;
+            background: transparent;
+            color: var(--text);
+            outline: none;
+            font-weight: 500;
+        }
+
+        .chart-area {
+            height: 280px;
+            position: relative;
+        }
+
+        .period-nav {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin-top: 15px;
+            background: var(--primary-light);
+            padding: 5px;
+            border-radius: 30px;
+        }
+
+        .period-btn {
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: 8px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .period-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .range-inputs {
+            display: none;
+            gap: 10px;
+            margin-top: 15px;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.8rem;
+        }
+
+        .range-inputs input {
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 5px;
+            background: var(--card);
+            color: var(--text);
+        }
+
+        .days-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 10px;
+        }
+
+        .day-column {
+            background: var(--card);
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 220px;
+        }
+
+        .day-header {
+            background: var(--primary-light);
+            padding: 8px;
+            text-align: center;
+            font-weight: bold;
+            border-bottom: 2px solid var(--primary);
+            font-size: 0.75rem;
+        }
+
+        .day-header small {
+            display: block;
+            opacity: 0.6;
+            font-weight: normal;
+        }
+
+        .daily-list {
+            list-style: none;
+            padding: 10px;
+            margin: 0;
+            flex-grow: 1;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            margin: 5px 0;
+            font-size: 0.8rem;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 5px;
+            transition: 0.2s;
+        }
+
+        .task-item:hover {
+            background: var(--primary-light);
+        }
+
+        .task-item input {
+            margin-right: 8px;
+            cursor: pointer;
+        }
+
+        .done {
+            text-decoration: line-through;
+            opacity: 0.4;
+        }
+
+        .progress-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 15px 0;
+            border-top: 1px solid var(--border);
+            background: var(--primary-light);
+        }
+
+        .circle-svg {
+            width: 60px;
+            height: 60px;
+            transform: rotate(-90deg);
+        }
+
+        .circle-bg {
+            fill: none;
+            stroke: var(--border);
+            stroke-width: 4;
+        }
+
+        .circle-bar {
+            fill: none;
+            stroke: var(--primary);
+            stroke-width: 4;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.5s ease;
+        }
+
+        .circle-text {
+            position: absolute;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .circle-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal {
+            background: var(--card);
+            padding: 25px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 420px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 15px 0;
+        }
+
+        .btn-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .switch {
+            position: relative;
+            width: 40px;
+            height: 20px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #ccc;
+            border-radius: 20px;
+            transition: .4s;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 14px;
+            width: 14px;
+            left: 3px;
+            bottom: 3px;
+            background: white;
+            border-radius: 50%;
+            transition: .4s;
+        }
+
+        input:checked+.slider {
+            background: var(--primary);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(20px);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .profile-section {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .profile-name {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: transparent;
+            border: none;
+            color: var(--primary);
+            width: 100%;
+            outline: none;
+        }
+
+        .profile-quote {
+            font-size: 0.9rem;
+            color: var(--text);
+            opacity: 0.8;
+            background: transparent;
+            border: none;
+            width: 100%;
+            font-style: italic;
+            outline: none;
+        }
+
+        .weekly-progress-container {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .weekly-svg {
+            width: 100px;
+            height: 100px;
+            transform: rotate(-90deg);
+        }
+
+        .weekly-bg {
+            fill: none;
+            stroke: var(--border);
+            stroke-width: 8;
+        }
+
+        .weekly-bar {
+            fill: none;
+            stroke: var(--primary);
+            stroke-width: 8;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.8s ease;
+        }
+
+        .weekly-text {
+            position: absolute;
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .weekly-label {
+            position: absolute;
+            bottom: -20px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            color: var(--text);
+            opacity: 0.6;
+        }
+
+        .modal {
+            background: var(--card);
+            padding: 25px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 450px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.4rem;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: var(--text);
+            padding: 5px;
+            border-radius: 50%;
+            transition: 0.2s;
+        }
+
+        .close-btn:hover {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .settings-group {
+            margin-bottom: 25px;
+        }
+
+        .group-label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--primary);
+            margin-bottom: 15px;
+            letter-spacing: 0.5px;
+            opacity: 0.9;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+
+        .setting-text {
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .color-wrapper {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 2px solid var(--border);
+            cursor: pointer;
+        }
+
+        .wallpaper-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .wallpaper-controls {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--text);
+            cursor: pointer;
+            transition: 0.2s;
+            flex: 1;
+        }
+
+        .btn-sm:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-sm.primary {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .data-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .btn-data {
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--text);
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-data:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .btn-danger-text {
+            width: 100%;
+            background: none;
+            border: none;
+            color: #ff5f5f;
+            font-size: 0.8rem;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 8px;
+            transition: 0.2s;
+        }
+
+        .btn-danger-text:hover {
+            background: #ffebeb;
+        }
+
+        .separator {
+            border: 0;
+            height: 1px;
+            background: var(--border);
+            margin: 10px 0 20px 0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <header>
+            <div class="header-content" style="width:100%">
+                <div class="profile-section">
+                    <input type="text" class="profile-name" id="userName" value="Achiever"
+                        oninput="updateProfile('name', this.value)" placeholder="Your Name">
+                    <input type="text" class="profile-quote" id="userQuote" value="Make it happen."
+                        oninput="updateProfile('quote', this.value)" placeholder="Your motivational quote...">
+                </div>
+
+                <div style="display:flex; gap: 20px; align-items:center;">
+                    <div class="stats-container">
+                        <div class="stat-item" title="Growth vs Previous Week">
+                            <span>📅 vs Last Wk:</span>
+                            <span id="growthStat">--</span>
+                        </div>
+                        <div class="stat-item" title="4-Week Average">
+                            <span>📊 4-Wk Avg:</span>
+                            <span id="avgStat">--</span>
+                        </div>
+                    </div>
+
+                    <div class="weekly-progress-container">
+                        <svg class="weekly-svg" viewBox="0 0 100 100">
+                            <circle class="weekly-bg" cx="50" cy="50" r="40"></circle>
+                            <circle class="weekly-bar" id="weeklyBar" cx="50" cy="50" r="40"
+                                style="stroke-dasharray: 251; stroke-dashoffset: 251;"></circle>
+                        </svg>
+                        <span class="weekly-text" id="weeklyText">0%</span>
+                        <span class="weekly-label">Weekly Pct</span>
+                    </div>
+                    <div><button class="btn-icon" onclick="toggleModal(true)">⚙️ Settings</button></div>
+                </div>
+            </div>
+        </header>
+
+        <!-- HABITS CONFIG -->
+        <div class="card">
+            <div class="section-title">
+                Habit Templates (Weekly)
+                <button class="btn-icon btn-outline" style="font-size:0.75rem; padding:4px 10px;"
+                    onclick="openTemplateModal()">📂 Manage Templates</button>
+            </div>
+            <div class="table-wrapper">
+                <table class="manager-table">
+                    <thead>
+                        <tr>
+                            <th style="text-align:left;">Habit Name</th>
+                            <th>M</th>
+                            <th>T</th>
+                            <th>W</th>
+                            <th>T</th>
+                            <th>F</th>
+                            <th>S</th>
+                            <th>S</th>
+                            <th>✕</th>
+                        </tr>
+                    </thead>
+                    <tbody id="masterBody"></tbody>
+                </table>
+            </div>
+            <button class="btn-icon" style="width:100%; margin-top:15px; border-radius:8px;" onclick="addTask()">+ Add
+                New Habit</button>
+        </div>
+
+        <!-- TODAY'S IMPORTANT TASKS -->
+        <div class="card" style="border-left: 5px solid #ff9800;">
+            <div class="section-title" style="border-color: #ff9800; color: #ff9800;">
+                Today's Important Tasks
+                <span id="todayDateDisplay" style="font-size:0.9rem; color:var(--text); font-weight:normal;"></span>
+            </div>
+
+            <div style="display:flex; gap:10px; margin-bottom:15px;">
+                <input type="text" id="todayTaskInput" class="task-input"
+                    style="border:1px solid var(--border); padding:10px; border-radius:5px; background:var(--bg);"
+                    placeholder="What's important today?">
+                <button class="btn-icon" style="background:#ff9800;" onclick="addTodayTask()">Add</button>
+            </div>
+
+            <ul class="daily-list" id="todayTaskList"></ul>
+        </div>
+
+        <!-- ANALYTICS -->
+        <div class="card">
+            <div class="section-title">Analytics Dashboard</div>
+            <div class="chart-area"><canvas id="mainChart"></canvas></div>
+            <div class="period-nav">
+                <button class="period-btn active" id="btn-week" onclick="switchPeriod('week')">Week</button>
+                <button class="period-btn" id="btn-month" onclick="switchPeriod('month')">Month</button>
+                <button class="period-btn" id="btn-year" onclick="switchPeriod('year')">Year</button>
+                <button class="period-btn" id="btn-range" onclick="switchPeriod('range')">Range</button>
+            </div>
+            <div id="rangeSelector" class="range-inputs">
+                <input type="date" id="startDate" onchange="switchPeriod('range')">
+                <span>to</span>
+                <input type="date" id="endDate" onchange="switchPeriod('range')">
+            </div>
+        </div>
+
+        <!-- EXECUTION GRID -->
+        <div class="section-title">
+            Daily Execution
+            <div class="nav-controls">
+                <button class="btn-icon" onclick="changeWeek(-1)">◀</button>
+                <span class="date-label" id="weekDisplay">...</span>
+                <button class="btn-icon" onclick="changeWeek(1)">▶</button>
+            </div>
+            <button class="btn-icon btn-outline" style="font-size:0.8rem; padding: 4px 10px; margin-left:10px;"
+                onclick="addWeeklyTask()">+ Week Goal</button>
+        </div>
+        <div class="days-grid" id="daysGrid"></div>
+    </div>
+
+    <!-- SETTINGS MODAL -->
+    <div class="modal-overlay" id="modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Settings & Backup</h2>
+                <button class="close-btn" onclick="toggleModal(false)">✕</button>
+            </div>
+
+            <!-- Group 1: Appearance -->
+            <div class="settings-group">
+                <label class="group-label">Appearance</label>
+
+                <div class="setting-item">
+                    <span class="setting-text">Dark Mode</span>
+                    <label class="switch">
+                        <input type="checkbox" id="darkToggle" onchange="setDarkMode()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="setting-item">
+                    <span class="setting-text">Theme Color</span>
+                    <div class="color-wrapper" onclick="document.getElementById('colorPicker').click()">
+                        <input type="color" id="colorPicker" oninput="setThemeColor(this.value)"
+                            style="width:100%; height:100%; opacity:0; cursor:pointer;">
+                    </div>
+                </div>
+
+                <div class="setting-item wallpaper-item">
+                    <span class="setting-text">Wallpaper</span>
+                    <div class="wallpaper-controls">
+                        <button class="btn-sm primary"
+                            onclick="document.getElementById('wallpaperInput').click()">Upload Image</button>
+                        <button class="btn-sm" onclick="resetWallpaper()">Reset Default</button>
+                        <input type="file" id="wallpaperInput" style="display:none" accept="image/*"
+                            onchange="handleWallpaperUpload(event)">
+                    </div>
+                </div>
+            </div>
+
+            <hr class="separator">
+
+            <!-- Group 2: Data -->
+            <div class="settings-group">
+                <label class="group-label">Data Management</label>
+                <div class="data-controls">
+                    <button class="btn-data" onclick="exportData()">📤 Backup</button>
+                    <button class="btn-data" onclick="document.getElementById('importFile').click()">📥 Restore</button>
+                    <input type="file" id="importFile" style="display:none" accept=".json" onchange="importData(event)">
+                </div>
+                <button class="btn-danger-text" onclick="resetData()">Clear All Data (Factory Reset)</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- TEMPLATE MODAL -->
+    <div class="modal-overlay" id="templateModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Manage Habit Templates</h2>
+                <button class="close-btn"
+                    onclick="document.getElementById('templateModal').style.display='none'">✕</button>
+            </div>
+
+            <div class="settings-group">
+                <label class="group-label">Current Set Action</label>
+                <div style="display:flex; gap:10px; margin-bottom:10px;">
+                    <input type="text" id="templateNameInput" class="task-input"
+                        placeholder="Template Name (e.g. Work Mode)" style="flex-grow:1;">
+                    <button class="btn-sm primary" onclick="saveTemplate()">Save Setup</button>
+                </div>
+                <button class="btn-sm" style="width:100%; border-color:#ff5f5f; color:#ff5f5f;"
+                    onclick="clearTasks()">Start Fresh (Clear All Habits)</button>
+            </div>
+
+            <hr class="separator">
+
+            <div class="settings-group">
+                <label class="group-label">Saved Templates</label>
+                <div id="templateList"
+                    style="display:flex; flex-direction:column; gap:8px; max-height:200px; overflow-y:auto;">
+                    <!-- Templates render here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TASK INPUT MODAL -->
+    <div class="modal-overlay" id="taskInputModal">
+        <div class="modal" style="text-align:center;">
+            <h3 style="margin-top:0">Add Custom Task</h3>
+            <input type="text" id="newTaskName" class="task-input"
+                style="border:1px solid var(--border); padding:10px; border-radius:5px; margin-bottom:15px; background:var(--bg);"
+                placeholder="Task Name (e.g. Read Book)">
+            <div class="btn-group">
+                <button class="btn-icon btn-outline" onclick="toggleTaskModal(false)">Cancel</button>
+                <button class="btn-icon" onclick="confirmAddTask()">Add Task</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const daysName = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        const monthsName = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+        // Core Data Initialization
+        let tasks = JSON.parse(localStorage.getItem('tasks_v3')) || [];
+        let log = JSON.parse(localStorage.getItem('log_v3')) || {};
+        let config = JSON.parse(localStorage.getItem('config_v4')) || { dark: true, color: '#00ff00' };
+        let customTasks = JSON.parse(localStorage.getItem('custom_tasks_v1')) || {};
+        let importantTasks = JSON.parse(localStorage.getItem('important_tasks_v1')) || {};
+        let weeklyHabits = JSON.parse(localStorage.getItem('weekly_habits_v1')) || {};
+        let habitTemplates = JSON.parse(localStorage.getItem('habit_templates_v1')) || {};
+        let userProfile = JSON.parse(localStorage.getItem('profile_v1')) || { name: 'Achiever', quote: 'Make it happen.' };
+
+        let chart;
+        let currentPeriod = 'week';
+        let viewDate = new Date();
+        let targetDateKey = null;
+
+        function init() {
+            initChart();
+            applySettings();
+            renderTable();
+            renderGrid();
+            updateAnalytics();
+            renderTodayHighlight();
+            loadProfile();
+        }
+
+        // --- DATA PORTABILITY (SHAREABLE) ---
+        function exportData() {
+            const dataStr = JSON.stringify({ tasks, log, config, customTasks, importantTasks, weeklyHabits, habitTemplates, userProfile }, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+
+            const exportFileDefaultName = 'execution-pro-backup.json';
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if (imported.tasks && imported.log) {
+                        tasks = imported.tasks;
+                        log = imported.log;
+                        if (imported.config) config = imported.config;
+                        if (imported.customTasks) customTasks = imported.customTasks;
+                        if (imported.importantTasks) importantTasks = imported.importantTasks;
+                        if (imported.weeklyHabits) weeklyHabits = imported.weeklyHabits;
+                        if (imported.habitTemplates) habitTemplates = imported.habitTemplates;
+                        if (imported.userProfile) userProfile = imported.userProfile;
+                        save();
+                        alert("Progress successfully imported!");
+                        location.reload();
+                    } else {
+                        alert("Invalid data format.");
+                    }
+                } catch (err) {
+                    alert("Error reading file.");
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // --- LOGIC ---
+        function save() {
+            localStorage.setItem('tasks_v3', JSON.stringify(tasks));
+            localStorage.setItem('log_v3', JSON.stringify(log));
+            localStorage.setItem('config_v4', JSON.stringify(config));
+            localStorage.setItem('custom_tasks_v1', JSON.stringify(customTasks));
+            localStorage.setItem('important_tasks_v1', JSON.stringify(importantTasks));
+            localStorage.setItem('weekly_habits_v1', JSON.stringify(weeklyHabits));
+            localStorage.setItem('habit_templates_v1', JSON.stringify(habitTemplates));
+            localStorage.setItem('profile_v1', JSON.stringify(userProfile));
+        }
+
+        function addTask() {
+            tasks.push({ id: 'id_' + Date.now(), name: "New Habit", schedule: [true, true, true, true, true, false, false] });
+            save(); renderTable(); renderGrid(); updateAnalytics(); renderTodayHighlight();
+        }
+
+        function updateName(idx, val) { tasks[idx].name = val; save(); renderGrid(); }
+
+        function toggleSchedule(tIdx, dIdx) { tasks[tIdx].schedule[dIdx] = !tasks[tIdx].schedule[dIdx]; save(); renderTable(); renderGrid(); updateAnalytics(); renderTodayHighlight(); }
+
+        function toggleLog(dateKey, taskId) {
+            if (!log[dateKey]) log[dateKey] = {};
+            log[dateKey][taskId] = !log[dateKey][taskId];
+            save(); renderGrid(); updateAnalytics(); renderTodayHighlight();
+        }
+
+        function delTask(idx) { if (confirm("Delete habit?")) { tasks.splice(idx, 1); save(); renderTable(); renderGrid(); updateAnalytics(); renderTodayHighlight(); } }
+
+        function resetData() { if (confirm("This will permanently delete ALL progress. Continue?")) { localStorage.clear(); location.reload(); } }
+
+        // --- CUSTOM TASKS LOGIC ---
+        function addCustomTask(dateKey) {
+            targetDateKey = dateKey;
+            taskMode = 'custom';
+            document.getElementById('taskInputModal').querySelector('h3').innerText = "Add Custom Task";
+            document.getElementById('newTaskName').placeholder = "Task Name (e.g. Read Book)";
+            document.getElementById('newTaskName').value = '';
+            toggleTaskModal(true);
+            setTimeout(() => document.getElementById('newTaskName').focus(), 100);
+        }
+
+        function toggleTaskModal(show) {
+            document.getElementById('taskInputModal').style.display = show ? 'flex' : 'none';
+        }
+
+        // confirmAddTask moved to bottom to consolodate logic
+
+        // Handle Enter key in modal
+        document.getElementById('newTaskName').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') confirmAddTask();
+        });
+
+        function toggleCustomTask(dateKey, taskId) {
+            if (!customTasks[dateKey]) return;
+            const task = customTasks[dateKey].find(t => t.id === taskId);
+            if (task) {
+                task.done = !task.done;
+                save(); renderGrid(); updateAnalytics(); renderTodayHighlight();
+            }
+        }
+
+        function removeCustomTask(dateKey, taskId) {
+            if (!customTasks[dateKey]) return;
+            if (!confirm("Remove this custom task?")) return;
+
+            customTasks[dateKey] = customTasks[dateKey].filter(t => t.id !== taskId);
+            if (customTasks[dateKey].length === 0) delete customTasks[dateKey];
+
+            save(); renderGrid(); updateAnalytics(); renderTodayHighlight();
+        }
+
+        // --- PROFILE & WEEKLY PROGRESS ---
+        function loadProfile() {
+            document.getElementById('userName').value = userProfile.name;
+            document.getElementById('userQuote').value = userProfile.quote;
+        }
+
+        function updateProfile(field, value) {
+            userProfile[field] = value;
+            save();
+        }
+
+        function calculateWeeklyProgress(startOfWeek) {
+            const stats = getWeekStats(startOfWeek);
+
+            const offset = 251 - (stats.pct / 100 * 251);
+
+            document.getElementById('weeklyBar').style.strokeDashoffset = offset;
+            document.getElementById('weeklyText').innerText = stats.pct + '%';
+
+            calculateGrowth(startOfWeek);
+        }
+
+        function getWeekStats(startMonday) {
+            let total = 0, done = 0;
+            for (let i = 0; i < 7; i++) {
+                let d = new Date(startMonday);
+                d.setDate(startMonday.getDate() + i);
+                let dateKey = d.toISOString().split('T')[0];
+                let dIdx = (d.getDay() + 6) % 7;
+
+                tasks.forEach(t => {
+                    if (t.schedule[dIdx]) {
+                        total++;
+                        if (log[dateKey] && log[dateKey][t.id]) done++;
+                    }
+                });
+
+                if (customTasks[dateKey]) {
+                    customTasks[dateKey].forEach(ct => {
+                        total++;
+                        if (ct.done) done++;
+                    });
+                }
+            }
+            return { total, done, pct: total ? Math.round((done / total) * 100) : 0 };
+        }
+
+        function calculateGrowth(currentMonday) {
+            // 1. Growth vs Last Week
+            const currentStats = getWeekStats(currentMonday);
+
+            const lastWeekMonday = new Date(currentMonday);
+            lastWeekMonday.setDate(currentMonday.getDate() - 7);
+            const lastStats = getWeekStats(lastWeekMonday);
+
+            const growth = currentStats.pct - lastStats.pct;
+            const growthEl = document.getElementById('growthStat');
+
+            if (growth > 0) {
+                growthEl.innerHTML = `<span class="trend-up">▲ +${growth}%</span>`;
+            } else if (growth < 0) {
+                growthEl.innerHTML = `<span class="trend-down">▼ ${growth}%</span>`;
+            } else {
+                growthEl.innerHTML = `<span class="trend-neutral">--</span>`;
+            }
+
+            // 2. Average Performance (Last 4 Weeks)
+            let totalPct = 0;
+            let count = 0;
+            for (let i = 0; i < 4; i++) {
+                let d = new Date(currentMonday);
+                d.setDate(currentMonday.getDate() - (i * 7));
+                totalPct += getWeekStats(d).pct;
+                count++;
+            }
+            const avg = Math.round(totalPct / count);
+            document.getElementById('avgStat').innerText = avg + '%';
+        }
+
+        // --- UI RENDERING ---
+        function renderTable() {
+            const b = document.getElementById('masterBody'); b.innerHTML = '';
+            tasks.forEach((t, ti) => {
+                let row = `<tr><td><input class="task-input" value="${t.name}" oninput="updateName(${ti}, this.value)"></td>`;
+                for (let di = 0; di < 7; di++) row += `<td><input type="checkbox" ${t.schedule[di] ? 'checked' : ''} onchange="toggleSchedule(${ti}, ${di})"></td>`;
+                row += `<td><button onclick="delTask(${ti})" style="background:none; border:none; color:#ff5f5f; cursor:pointer;">✕</button></td></tr>`;
+                b.innerHTML += row;
+            });
+        }
+
+        function renderGrid() {
+            const g = document.getElementById('daysGrid'); g.innerHTML = '';
+            const startOfWeek = getMonday(new Date(viewDate));
+            const endOfWeek = new Date(startOfWeek); endOfWeek.setDate(startOfWeek.getDate() + 6);
+            document.getElementById('weekDisplay').innerText = `${formatShortDate(startOfWeek)} - ${formatShortDate(endOfWeek)}`;
+
+            calculateWeeklyProgress(startOfWeek);
+
+            for (let i = 0; i < 7; i++) {
+                let d = new Date(startOfWeek); d.setDate(startOfWeek.getDate() + i);
+                let dateKey = d.toISOString().split('T')[0];
+                let dayIdx = (d.getDay() + 6) % 7;
+
+                let html = `<div class="day-column">
+                <div class="day-header">${daysName[i]} <small>${d.getDate()} ${monthsName[d.getMonth()]}</small></div>
+                <ul class="daily-list">`;
+
+                let total = 0, done = 0;
+
+                // Regular Habits
+                tasks.forEach(t => {
+                    if (t.schedule[dayIdx]) {
+                        total++;
+                        let isDone = log[dateKey] && log[dateKey][t.id];
+                        if (isDone) done++;
+                        html += `<li class="task-item" onclick="toggleLog('${dateKey}', '${t.id}')">
+                        <input type="checkbox" ${isDone ? 'checked' : ''}>
+                        <span class="${isDone ? 'done' : ''}">${t.name}</span>
+                    </li>`;
+                    }
+                });
+
+                // Custom Tasks
+                if (customTasks[dateKey]) {
+                    customTasks[dateKey].forEach(ct => {
+                        total++;
+                        if (ct.done) done++;
+                        html += `<li class="task-item" style="border-left: 2px solid var(--primary);">
+                            <div onclick="toggleCustomTask('${dateKey}', '${ct.id}')" style="display:flex; align-items:center; flex-grow:1;">
+                                <input type="checkbox" ${ct.done ? 'checked' : ''}>
+                                <span class="${ct.done ? 'done' : ''}">${ct.name}</span>
+                            </div>
+                            <button onclick="removeCustomTask('${dateKey}', '${ct.id}')" style="background:none; border:none; color:#999; cursor:pointer; font-size:0.7rem; padding:0 5px;">✕</button>
+                        </li>`;
+                    });
+                }
+
+                // Weekly Specific Habits
+                const weekKey = startOfWeek.toISOString().split('T')[0];
+                if (weeklyHabits[weekKey]) {
+                    weeklyHabits[weekKey].forEach((wh, index) => {
+                        if (wh.schedule[dayIdx]) {
+                            total++;
+                            let isDone = log[dateKey] && log[dateKey][wh.id];
+                            if (isDone) done++;
+                            html += `<li class="task-item" style="border-left: 2px solid #9c27b0;" onclick="toggleLog('${dateKey}', '${wh.id}')">
+                                <input type="checkbox" ${isDone ? 'checked' : ''}>
+                                <span class="${isDone ? 'done' : ''}" style="flex-grow:1;">${wh.name} <small style="color:#9c27b0; font-size:0.6rem;">(Week Only)</small></span>
+                                <button onclick="deleteWeeklyHabit('${weekKey}', ${index}, event)" style="background:none; border:none; color:#999; cursor:pointer; font-size:0.7rem;">✕</button>
+                            </li>`;
+                        }
+                    });
+                }
+
+                let pct = total ? Math.round((done / total) * 100) : 0;
+                let offset = 157 - (pct / 100 * 157);
+
+                html += `</ul>
+                <div style="text-align:center; padding-bottom:10px;">
+                    <button class="btn-icon" style="padding:4px 10px; font-size:0.7rem;" onclick="addCustomTask('${dateKey}')">+</button>
+                </div>
+                <div class="progress-box"><div class="circle-wrapper">
+                <svg class="circle-svg" viewBox="0 0 60 60"><circle class="circle-bg" cx="30" cy="30" r="25"></circle>
+                <circle class="circle-bar" cx="30" cy="30" r="25" style="stroke-dasharray: 157; stroke-dashoffset: ${offset};"></circle></svg>
+                <span class="circle-text">${pct}%</span></div></div></div>`;
+                g.innerHTML += html;
+            }
+        }
+
+        function switchPeriod(p) {
+            currentPeriod = p;
+            document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('btn-' + p).classList.add('active');
+            document.getElementById('rangeSelector').style.display = (p === 'range') ? 'flex' : 'none';
+            updateAnalytics();
+        }
+
+        function updateAnalytics() {
+            if (!chart) return;
+            let labels = [], data = [];
+            const today = new Date();
+
+            if (currentPeriod === 'week') {
+                labels = daysName;
+                const start = getMonday(new Date(viewDate));
+                for (let i = 0; i < 7; i++) {
+                    let d = new Date(start); d.setDate(start.getDate() + i);
+                    data.push(calculateDayPct(d));
+                }
+            } else if (currentPeriod === 'month') {
+                const daysInM = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+                for (let i = 1; i <= daysInM; i++) { labels.push(i); data.push(calculateDayPct(new Date(today.getFullYear(), today.getMonth(), i))); }
+            } else if (currentPeriod === 'year') {
+                labels = monthsName;
+                for (let m = 0; m < 12; m++) {
+                    let mTotal = 0, mCount = 0;
+                    let dInM = new Date(today.getFullYear(), m + 1, 0).getDate();
+                    for (let i = 1; i <= dInM; i++) { mTotal += calculateDayPct(new Date(today.getFullYear(), m, i)); mCount++; }
+                    data.push(Math.round(mTotal / mCount));
+                }
+            } else if (currentPeriod === 'range') {
+                let s = new Date(document.getElementById('startDate').value || today);
+                let e = new Date(document.getElementById('endDate').value || today);
+                if (s > e) [s, e] = [e, s];
+                let curr = new Date(s);
+                while (curr <= e) { labels.push(formatShortDate(curr)); data.push(calculateDayPct(new Date(curr))); curr.setDate(curr.getDate() + 1); }
+            }
+            chart.data.labels = labels; chart.data.datasets[0].data = data; chart.update();
+        }
+
+        function calculateDayPct(date) {
+            let dateKey = date.toISOString().split('T')[0];
+            let dIdx = (date.getDay() + 6) % 7;
+            let total = 0, done = 0;
+
+            // Regular Habits
+            tasks.forEach(t => { if (t.schedule[dIdx]) { total++; if (log[dateKey] && log[dateKey][t.id]) done++; } });
+
+            // Custom Tasks
+            if (customTasks[dateKey]) {
+                customTasks[dateKey].forEach(ct => {
+                    total++;
+                    if (ct.done) done++;
+                });
+            }
+
+            // Weekly Specific Habits
+            const startOfWeek = getMonday(new Date(date));
+            const weekKey = startOfWeek.toISOString().split('T')[0];
+            if (weeklyHabits[weekKey]) {
+                weeklyHabits[weekKey].forEach(wh => {
+                    if (wh.schedule[dIdx]) {
+                        total++;
+                        if (log[dateKey] && log[dateKey][wh.id]) done++;
+                    }
+                });
+            }
+
+            return total ? Math.round((done / total) * 100) : 0;
+        }
+
+        function getMonday(d) { d = new Date(d); let day = d.getDay(), diff = d.getDate() - day + (day == 0 ? -6 : 1); return new Date(d.setDate(diff)); }
+        function formatShortDate(d) { return `${d.getDate()} ${monthsName[d.getMonth()]}`; }
+        function changeWeek(dir) { viewDate.setDate(viewDate.getDate() + (dir * 7)); renderGrid(); updateAnalytics(); }
+        function toggleModal(s) { document.getElementById('modal').style.display = s ? 'flex' : 'none'; }
+        function setDarkMode() { config.dark = !config.dark; applySettings(); }
+        function setThemeColor(c) { config.color = c; applySettings(); }
+
+        function applySettings() {
+            document.body.className = config.dark ? 'dark-mode' : '';
+            document.getElementById('darkToggle').checked = config.dark;
+            document.getElementById('colorPicker').value = config.color;
+            document.documentElement.style.setProperty('--primary', config.color);
+            document.documentElement.style.setProperty('--primary-light', config.color + '22');
+            if (chart) { chart.data.datasets[0].borderColor = config.color; chart.data.datasets[0].backgroundColor = config.color + '22'; chart.update(); }
+
+            if (config.wallpaper) {
+                document.body.style.backgroundImage = `url(${config.wallpaper})`;
+            } else {
+                document.body.style.backgroundImage = 'none';
+            }
+
+            save();
+        }
+
+        function handleWallpaperUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                // Resize image to reduce storage size (optional but recommended for localStorage)
+                // For now, simple direct save. If laggy, we can add scaling.
+                config.wallpaper = e.target.result;
+                applySettings();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function resetWallpaper() {
+            config.wallpaper = null;
+            applySettings();
+        }
+
+        function initChart() {
+            chart = new Chart(document.getElementById('mainChart').getContext('2d'), {
+                type: 'line',
+                data: { labels: [], datasets: [{ data: [], borderColor: config.color, tension: 0.3, fill: true, backgroundColor: config.color + '22', pointRadius: 3 }] },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' } }, x: { grid: { display: false } } }, plugins: { legend: { display: false } } }
+            });
+        }
+
+        function addTodayTask() {
+            const name = document.getElementById('todayTaskInput').value;
+            if (!name) return;
+            const dateKey = new Date().toISOString().split('T')[0];
+            if (!importantTasks[dateKey]) importantTasks[dateKey] = [];
+
+            importantTasks[dateKey].push({
+                id: 'imp_' + Date.now(),
+                name: name,
+                done: false
+            });
+
+            document.getElementById('todayTaskInput').value = '';
+            save(); renderTodayHighlight();
+        }
+
+        function toggleImportantTask(dateKey, taskId) {
+            if (!importantTasks[dateKey]) return;
+            const task = importantTasks[dateKey].find(t => t.id === taskId);
+            if (task) {
+                task.done = !task.done;
+                save(); renderTodayHighlight();
+            }
+        }
+
+        function removeImportantTask(dateKey, taskId) {
+            if (!importantTasks[dateKey]) return;
+            if (!confirm("Remove this important task?")) return;
+
+            importantTasks[dateKey] = importantTasks[dateKey].filter(t => t.id !== taskId);
+            if (importantTasks[dateKey].length === 0) delete importantTasks[dateKey];
+
+            save(); renderTodayHighlight();
+        }
+
+        function renderTodayHighlight() {
+            const list = document.getElementById('todayTaskList');
+            const dateDisplay = document.getElementById('todayDateDisplay');
+            if (!list || !dateDisplay) return;
+
+            const today = new Date();
+            const dateKey = today.toISOString().split('T')[0];
+
+            dateDisplay.innerText = today.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+            list.innerHTML = '';
+
+            if (importantTasks[dateKey] && importantTasks[dateKey].length > 0) {
+                importantTasks[dateKey].forEach(ct => {
+                    list.innerHTML += `<li class="task-item" style="border-left: 2px solid #ff9800; background: var(--bg);">
+                        <div onclick="toggleImportantTask('${dateKey}', '${ct.id}')" style="display:flex; align-items:center; flex-grow:1;">
+                            <input type="checkbox" ${ct.done ? 'checked' : ''}>
+                            <span class="${ct.done ? 'done' : ''}" style="font-size:1rem; margin-left:10px;">${ct.name}</span>
+                        </div>
+                        <button onclick="removeImportantTask('${dateKey}', '${ct.id}')" style="background:none; border:none; color:#ff5f5f; cursor:pointer;">✕</button>
+                    </li>`;
+                });
+            } else {
+                list.innerHTML = '<div style="text-align:center; opacity:0.6; padding:20px;">No important tasks yet. Add one above!</div>';
+            }
+        }
+
+        // Handle Enter on today input
+        const todayInput = document.getElementById('todayTaskInput');
+        if (todayInput) {
+            todayInput.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') addTodayTask();
+            });
+        }
+
+        // Create "Add Weekly Task" Modal logic or prompt
+        let taskMode = 'custom'; // 'custom' or 'weekly'
+
+        function addWeeklyTask() {
+            taskMode = 'weekly';
+            document.getElementById('taskInputModal').querySelector('h3').innerText = "Add Weekly Goal";
+            document.getElementById('newTaskName').value = '';
+            document.getElementById('newTaskName').placeholder = "Goal for this week only...";
+            toggleTaskModal(true);
+            setTimeout(() => document.getElementById('newTaskName').focus(), 100);
+        }
+
+        function confirmAddTask() {
+            const name = document.getElementById('newTaskName').value;
+            if (!name) return;
+
+            if (taskMode === 'weekly') {
+                const startOfWeek = getMonday(new Date(viewDate));
+                const weekKey = startOfWeek.toISOString().split('T')[0];
+
+                if (!weeklyHabits[weekKey]) weeklyHabits[weekKey] = [];
+
+                weeklyHabits[weekKey].push({
+                    id: 'wh_' + Date.now(),
+                    name: name,
+                    schedule: [true, true, true, true, true, true, true]
+                });
+            } else {
+                // Default Custom Task (Day specific)
+                if (!targetDateKey) return;
+                if (!customTasks[targetDateKey]) customTasks[targetDateKey] = [];
+                customTasks[targetDateKey].push({
+                    id: 'ct_' + Date.now(),
+                    name: name,
+                    done: false
+                });
+            }
+
+            save(); renderGrid(); updateAnalytics(); renderTodayHighlight();
+            toggleTaskModal(false);
+        }
+
+        function deleteWeeklyHabit(weekKey, index, event) {
+            event.stopPropagation();
+            if (!confirm("Remove this weekly goal?")) return;
+            weeklyHabits[weekKey].splice(index, 1);
+            if (weeklyHabits[weekKey].length === 0) delete weeklyHabits[weekKey];
+            save(); renderGrid(); updateAnalytics();
+        }
+
+        // --- HABIT TEMPLATE LOGIC ---
+        function openTemplateModal() {
+            renderTemplateList();
+            document.getElementById('templateModal').style.display = 'flex';
+        }
+
+        function saveTemplate() {
+            const name = document.getElementById('templateNameInput').value.trim();
+            if (!name) return alert("Please enter a template name.");
+            if (habitTemplates[name] && !confirm(`Overwrite existing template "${name}"?`)) return;
+
+            habitTemplates[name] = JSON.parse(JSON.stringify(tasks));
+            save();
+            document.getElementById('templateNameInput').value = '';
+            renderTemplateList();
+            alert("Template saved!");
+        }
+
+        function loadTemplate(name) {
+            if (!confirm(`Load template "${name}"? Unsaved changes to current habits will be discarded.`)) return;
+            tasks = JSON.parse(JSON.stringify(habitTemplates[name]));
+            resetDataViews();
+            document.getElementById('templateModal').style.display = 'none';
+        }
+
+        function deleteTemplate(name) {
+            if (!confirm(`Delete template "${name}"?`)) return;
+            delete habitTemplates[name];
+            save();
+            renderTemplateList();
+        }
+
+        function clearTasks() {
+            if (!confirm("Clear all current habits? This allows you to start fresh. (History for old habits remains in logs)")) return;
+            tasks = [];
+            resetDataViews();
+            document.getElementById('templateModal').style.display = 'none';
+        }
+
+        function resetDataViews() {
+            save(); renderTable(); renderGrid(); updateAnalytics(); renderTodayHighlight();
+        }
+
+        function renderTemplateList() {
+            const list = document.getElementById('templateList');
+            list.innerHTML = '';
+            const names = Object.keys(habitTemplates);
+
+            if (names.length === 0) {
+                list.innerHTML = '<div style="text-align:center; opacity:0.5; font-size:0.8rem;">No saved templates</div>';
+                return;
+            }
+
+            names.forEach(name => {
+                const count = habitTemplates[name].length;
+                list.innerHTML += `
+                <div class="setting-item" style="padding:8px 10px; background:var(--bg); border-radius:6px; border:1px solid var(--border);">
+                    <div style="display:flex; flex-direction:column;">
+                        <span style="font-weight:600; font-size:0.9rem;">${name}</span>
+                        <span style="font-size:0.7rem; opacity:0.7;">${count} habits</span>
+                    </div>
+                    <div style="display:flex; gap:5px;">
+                        <button class="btn-sm" onclick="loadTemplate('${name}')">Load</button>
+                        <button class="btn-icon" style="color:#ff5f5f; font-size:0.9rem;" onclick="deleteTemplate('${name}')">🗑</button>
+                    </div>
+                </div>`;
+            });
+        }
+
+        init();
+    </script>
+</body>
+
+</html>
