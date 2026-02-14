@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tast Tracker</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
             --primary: #5b8e7d;
@@ -14,6 +16,7 @@
             --card: #ffffff;
             --text: #333;
             --border: #ddd;
+            --highlight: #ff9800;
         }
 
         body.dark-mode {
@@ -405,20 +408,58 @@
         }
 
         .digital-clock {
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 2.5rem;
-            font-weight: 900;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.2rem;
             font-weight: 900;
             color: var(--primary);
             background: var(--primary-ultra-light);
-            padding: 15px 0;
+            padding: 15px 10px;
             border-radius: 10px;
             border: 3px solid var(--primary);
             text-align: center;
             width: 100%;
             margin-bottom: 20px;
-            letter-spacing: 4px;
+            letter-spacing: 2px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            line-height: 1.2;
+        }
+
+        .clock-date {
+            display: block;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            opacity: 0.8;
+            margin-top: 5px;
+            font-weight: 500;
+        }
+
+        .clock-day {
+            color: var(--highlight);
+            font-weight: 800;
+            font-size: 1.1rem;
+        }
+
+        .clock-seconds {
+            color: var(--highlight);
+            font-size: 0.8em;
+            margin: 0 5px;
+        }
+
+        .day-column.current-day {
+            border: 2px solid var(--highlight);
+            box-shadow: 0 0 15px rgba(255, 152, 0, 0.2);
+            position: relative;
+        }
+
+        .day-column.current-day .day-header {
+            background: var(--highlight);
+            color: white;
+            border-bottom-color: var(--highlight);
+        }
+
+        .day-column.current-day .day-header small {
+            color: white;
+            opacity: 0.9;
         }
 
         .quote-container {
@@ -455,18 +496,88 @@
             outline: none;
         }
 
-        .weekly-progress-container {
-            position: relative;
-            width: 100px;
-            height: 100px;
+        .stats-container {
             display: flex;
-            justify-content: center;
+            flex-direction: row;
+            gap: 20px;
+            background: var(--card);
+            padding: 10px 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
             align-items: center;
         }
 
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text);
+            white-space: nowrap;
+        }
+
+        .stat-icon {
+            font-size: 1rem;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: var(--primary-ultra-light);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            color: var(--primary);
+        }
+
+        .stat-label {
+            flex-grow: 1;
+            font-weight: 600;
+            opacity: 0.8;
+        }
+
+        .stat-value {
+            color: var(--primary);
+            font-weight: 900;
+            font-size: 1.1rem;
+            font-family: 'Orbitron', sans-serif;
+            min-width: 45px;
+            text-align: right;
+        }
+
+        .trend-up {
+            color: #4caf50;
+            font-weight: 900;
+        }
+
+        .trend-down {
+            color: #f44336;
+            font-weight: 900;
+        }
+
+        .trend-neutral {
+            color: var(--text);
+            opacity: 0.4;
+            font-weight: 900;
+        }
+
+        .weekly-progress-container {
+            position: relative;
+            width: 90px;
+            height: 90px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: var(--card);
+            border-radius: 50%;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border);
+        }
+
         .weekly-svg {
-            width: 100px;
-            height: 100px;
+            width: 80px;
+            height: 80px;
             transform: rotate(-90deg);
         }
 
@@ -486,30 +597,76 @@
 
         .weekly-text {
             position: absolute;
-            font-size: 1.2rem;
-            font-weight: 800;
+            font-size: 1.1rem;
+            font-weight: 900;
             color: var(--primary);
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .dashboard-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            align-items: stretch;
+        }
+
+        .dashboard-row .card {
+            flex: 1;
+            margin-bottom: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @media (max-width: 850px) {
+            .dashboard-row {
+                flex-direction: column;
+            }
         }
 
         .weekly-label {
             position: absolute;
-            bottom: -20px;
-            font-size: 0.7rem;
-            font-weight: bold;
+            bottom: -22px;
+            font-size: 0.65rem;
+            font-weight: 800;
             color: var(--text);
-            opacity: 0.6;
+            opacity: 0.7;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            white-space: nowrap;
         }
 
         .modal {
             background: var(--card);
-            padding: 25px;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 450px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-            max-height: 90vh;
+            padding: 30px;
+            border-radius: 15px;
+            width: 95%;
+            max-width: 800px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.2);
+            max-height: 85vh;
             overflow-y: auto;
             position: relative;
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary) transparent;
+        }
+
+        .modal::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .modal::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .modal::-webkit-scrollbar-thumb {
+            background-color: var(--primary);
+            border-radius: 10px;
+            opacity: 0.5;
+        }
+
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 30px;
         }
 
         .modal-header {
@@ -684,19 +841,22 @@
                     <div class="quote-container">
                         <input type="text" class="profile-quote" id="userQuote" value="Make it happen."
                             oninput="updateProfile('quote', this.value)" placeholder="Your motivational quote...">
-                        <button class="btn-inspire" onclick="setRandomQuote()" title="Get Inspired">✨</button>
+                        <button class="btn-inspire" onclick="setRandomQuote()" title="Get Inspired"><i
+                                class="fa-solid fa-wand-magic-sparkles"></i></button>
                     </div>
                 </div>
 
                 <div style="display:flex; gap: 20px; align-items:center;">
                     <div class="stats-container">
                         <div class="stat-item" title="Growth vs Previous Week">
-                            <span>📅 vs Last Wk:</span>
-                            <span id="growthStat">--</span>
+                            <span class="stat-icon"><i class="fa-solid fa-chart-line"></i></span>
+                            <span class="stat-label">vs Last Wk:</span>
+                            <span class="stat-value" id="growthStat">--</span>
                         </div>
                         <div class="stat-item" title="4-Week Average">
-                            <span>📊 4-Wk Avg:</span>
-                            <span id="avgStat">--</span>
+                            <span class="stat-icon"><i class="fa-solid fa-chart-bar"></i></span>
+                            <span class="stat-label">4-Wk Avg:</span>
+                            <span class="stat-value" id="avgStat">0%</span>
                         </div>
                     </div>
 
@@ -707,57 +867,63 @@
                                 style="stroke-dasharray: 251; stroke-dashoffset: 251;"></circle>
                         </svg>
                         <span class="weekly-text" id="weeklyText">0%</span>
-                        <span class="weekly-label">Weekly Pct</span>
+                        <span class="weekly-label">Weekly Progress</span>
                     </div>
-                    <div><button class="btn-icon" onclick="toggleModal(true)">⚙️ Settings</button></div>
+                    <div><button class="btn-icon btn-outline" onclick="toggleModal(true)"
+                            style="padding: 10px; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;"><i
+                                class="fa-solid fa-gear"></i></button>
+                    </div>
                 </div>
             </div>
         </header>
 
-        <!-- HABITS CONFIG -->
-        <div class="card">
-            <div class="section-title">
-                Habit Templates (Weekly)
-                <button class="btn-icon btn-outline" style="font-size:0.75rem; padding:4px 10px;"
-                    onclick="openTemplateModal()">📂 Manage Templates</button>
-            </div>
-            <div class="table-wrapper">
-                <table class="manager-table">
-                    <thead>
-                        <tr>
-                            <th style="text-align:left;">Habit Name</th>
-                            <th>M</th>
-                            <th>T</th>
-                            <th>W</th>
-                            <th>T</th>
-                            <th>F</th>
-                            <th>S</th>
-                            <th>S</th>
-                            <th>✕</th>
-                        </tr>
-                    </thead>
-                    <tbody id="masterBody"></tbody>
-                </table>
-            </div>
-            <button class="btn-icon" style="width:100%; margin-top:15px; border-radius:8px;" onclick="addTask()">+ Add
-                New Habit</button>
-        </div>
-
-        <!-- TODAY'S IMPORTANT TASKS -->
-        <div class="card" style="border-left: 5px solid #ff9800;">
-            <div class="section-title" style="border-color: #ff9800; color: #ff9800;">
-                Today's Important Tasks
-                <span id="todayDateDisplay" style="font-size:0.9rem; color:var(--text); font-weight:normal;"></span>
+        <div class="dashboard-row">
+            <!-- HABITS CONFIG -->
+            <div class="card">
+                <div class="section-title">
+                    Habit Templates (Weekly)
+                    <button class="btn-icon btn-outline" style="font-size:0.75rem; padding:4px 10px;"
+                        onclick="openTemplateModal()"><i class="fa-solid fa-folder-open"></i> Manage Templates</button>
+                </div>
+                <div class="table-wrapper">
+                    <table class="manager-table">
+                        <thead>
+                            <tr>
+                                <th style="text-align:left;">Habit Name</th>
+                                <th>M</th>
+                                <th>T</th>
+                                <th>W</th>
+                                <th>T</th>
+                                <th>F</th>
+                                <th>S</th>
+                                <th>S</th>
+                                <th>✕</th>
+                            </tr>
+                        </thead>
+                        <tbody id="masterBody"></tbody>
+                    </table>
+                </div>
+                <button class="btn-icon" style="width:100%; margin-top: auto; padding-top:15px; border-radius:8px;"
+                    onclick="addTask()"><i class="fa-solid fa-plus"></i> Add New Habit</button>
             </div>
 
-            <div style="display:flex; gap:10px; margin-bottom:15px;">
-                <input type="text" id="todayTaskInput" class="task-input"
-                    style="border:1px solid var(--border); padding:10px; border-radius:5px; background:var(--bg);"
-                    placeholder="What's important today?">
-                <button class="btn-icon" style="background:#ff9800;" onclick="addTodayTask()">Add</button>
-            </div>
+            <!-- TODAY'S IMPORTANT TASKS -->
+            <div class="card" style="border-left: 5px solid #ff9800;">
+                <div class="section-title" style="border-color: #ff9800; color: #ff9800;">
+                    Today's Important Tasks
+                    <span id="todayDateDisplay" style="font-size:0.9rem; color:var(--text); font-weight:normal;"></span>
+                </div>
 
-            <ul class="daily-list" id="todayTaskList"></ul>
+                <div style="display:flex; gap:10px; margin-bottom:15px;">
+                    <input type="text" id="todayTaskInput" class="task-input"
+                        style="border:1px solid var(--border); padding:10px; border-radius:5px; background:var(--bg);"
+                        placeholder="What's important today?">
+                    <button class="btn-icon" style="background:#ff9800;" onclick="addTodayTask()"><i
+                            class="fa-solid fa-plus"></i> Add</button>
+                </div>
+
+                <ul class="daily-list" id="todayTaskList" style="flex-grow:1;"></ul>
+            </div>
         </div>
 
         <!-- ANALYTICS -->
@@ -781,12 +947,12 @@
         <div class="section-title">
             Daily Execution
             <div class="nav-controls">
-                <button class="btn-icon" onclick="changeWeek(-1)">◀</button>
+                <button class="btn-icon" onclick="changeWeek(-1)"><i class="fa-solid fa-chevron-left"></i></button>
                 <span class="date-label" id="weekDisplay">...</span>
-                <button class="btn-icon" onclick="changeWeek(1)">▶</button>
+                <button class="btn-icon" onclick="changeWeek(1)"><i class="fa-solid fa-chevron-right"></i></button>
             </div>
             <button class="btn-icon btn-outline" style="font-size:0.8rem; padding: 4px 10px; margin-left:10px;"
-                onclick="addWeeklyTask()">+ Week Goal</button>
+                onclick="addWeeklyTask()"><i class="fa-solid fa-plus"></i> Week Goal</button>
         </div>
         <div class="days-grid" id="daysGrid"></div>
     </div>
@@ -796,52 +962,123 @@
         <div class="modal">
             <div class="modal-header">
                 <h2>Settings & Backup</h2>
-                <button class="close-btn" onclick="toggleModal(false)">✕</button>
+                <button class="close-btn" onclick="toggleModal(false)"><i class="fa-solid fa-xmark"></i></button>
             </div>
 
-            <!-- Group 1: Appearance -->
-            <div class="settings-group">
-                <label class="group-label">Appearance</label>
+            <div class="settings-grid">
+                <!-- Group 1: Appearance -->
+                <div class="settings-group">
+                    <label class="group-label">Appearance</label>
 
-                <div class="setting-item">
-                    <span class="setting-text">Dark Mode</span>
-                    <label class="switch">
-                        <input type="checkbox" id="darkToggle" onchange="setDarkMode()">
-                        <span class="slider"></span>
-                    </label>
-                </div>
+                    <div class="setting-item">
+                        <span class="setting-text">Dark Mode</span>
+                        <label class="switch">
+                            <input type="checkbox" id="darkToggle" onchange="setDarkMode()">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
 
-                <div class="setting-item">
-                    <span class="setting-text">Theme Color</span>
-                    <div class="color-wrapper" onclick="document.getElementById('colorPicker').click()">
-                        <input type="color" id="colorPicker" oninput="setThemeColor(this.value)"
-                            style="width:100%; height:100%; opacity:0; cursor:pointer;">
+                    <div class="setting-item">
+                        <span class="setting-text">Theme Color</span>
+                        <div class="color-wrapper" onclick="document.getElementById('colorPicker').click()">
+                            <input type="color" id="colorPicker" oninput="setThemeColor(this.value)"
+                                style="width:100%; height:100%; opacity:0; cursor:pointer;">
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <span class="setting-text">Today Highlight Color</span>
+                        <div class="color-wrapper" style="background:var(--highlight)"
+                            onclick="document.getElementById('highlightPicker').click()">
+                            <input type="color" id="highlightPicker" oninput="setHighlightColor(this.value)"
+                                style="width:100%; height:100%; opacity:0; cursor:pointer;">
+                        </div>
+                    </div>
+
+                    <div class="separator" style="margin: 10px 0; opacity: 0.3;"></div>
+                    <label class="group-label" style="font-size: 0.7rem;">Advanced Colors</label>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div class="setting-item"
+                            style="flex-direction: column; align-items: flex-start; gap: 5px; border:none;">
+                            <span style="font-size: 0.75rem;">Background</span>
+                            <div class="color-wrapper"
+                                style="background:var(--bg); width: 100%; height: 25px; border-radius: 5px;"
+                                onclick="document.getElementById('bgPicker').click()">
+                                <input type="color" id="bgPicker" oninput="setCustomColor('bg', this.value)"
+                                    style="width:100%; height:100%; opacity:0; cursor:pointer;">
+                            </div>
+                        </div>
+                        <div class="setting-item"
+                            style="flex-direction: column; align-items: flex-start; gap: 5px; border:none;">
+                            <span style="font-size: 0.75rem;">Card</span>
+                            <div class="color-wrapper"
+                                style="background:var(--card); width: 100%; height: 25px; border-radius: 5px;"
+                                onclick="document.getElementById('cardPicker').click()">
+                                <input type="color" id="cardPicker" oninput="setCustomColor('card', this.value)"
+                                    style="width:100%; height:100%; opacity:0; cursor:pointer;">
+                            </div>
+                        </div>
+                        <div class="setting-item"
+                            style="flex-direction: column; align-items: flex-start; gap: 5px; border:none;">
+                            <span style="font-size: 0.75rem;">Text</span>
+                            <div class="color-wrapper"
+                                style="background:var(--text); width: 100%; height: 25px; border-radius: 5px;"
+                                onclick="document.getElementById('textPicker').click()">
+                                <input type="color" id="textPicker" oninput="setCustomColor('text', this.value)"
+                                    style="width:100%; height:100%; opacity:0; cursor:pointer;">
+                            </div>
+                        </div>
+                        <div class="setting-item"
+                            style="flex-direction: column; align-items: flex-start; gap: 5px; border:none;">
+                            <span style="font-size: 0.75rem;">Border</span>
+                            <div class="color-wrapper"
+                                style="background:var(--border); width: 100%; height: 25px; border-radius: 5px;"
+                                onclick="document.getElementById('borderPicker').click()">
+                                <input type="color" id="borderPicker" oninput="setCustomColor('border', this.value)"
+                                    style="width:100%; height:100%; opacity:0; cursor:pointer;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn-sm" style="width:100%; margin-top:10px;" onclick="resetColors()">Reset Custom
+                        Colors</button>
+
+                    <div class="setting-item wallpaper-item">
+                        <span class="setting-text">Wallpaper</span>
+                        <div class="wallpaper-controls">
+                            <button class="btn-sm primary"
+                                onclick="document.getElementById('wallpaperInput').click()">Upload Image</button>
+                            <button class="btn-sm" onclick="resetWallpaper()">Reset Default</button>
+                            <input type="file" id="wallpaperInput" style="display:none" accept="image/*"
+                                onchange="handleWallpaperUpload(event)">
+                        </div>
                     </div>
                 </div>
 
-                <div class="setting-item wallpaper-item">
-                    <span class="setting-text">Wallpaper</span>
-                    <div class="wallpaper-controls">
-                        <button class="btn-sm primary"
-                            onclick="document.getElementById('wallpaperInput').click()">Upload Image</button>
-                        <button class="btn-sm" onclick="resetWallpaper()">Reset Default</button>
-                        <input type="file" id="wallpaperInput" style="display:none" accept="image/*"
-                            onchange="handleWallpaperUpload(event)">
+                <!-- Group 2: Data & Info -->
+                <div class="settings-group">
+                    <label class="group-label">Data Management</label>
+                    <div class="data-controls">
+                        <button class="btn-data" onclick="exportData()"><i class="fa-solid fa-file-export"></i>
+                            Backup</button>
+                        <button class="btn-data" onclick="document.getElementById('importFile').click()"><i
+                                class="fa-solid fa-file-import"></i> Restore</button>
+                        <input type="file" id="importFile" style="display:none" accept=".json"
+                            onchange="importData(event)">
+                    </div>
+                    <button class="btn-danger-text" onclick="resetData()"><i
+                            class="fa-solid fa-triangle-exclamation"></i> Clear All Data (Factory Reset)</button>
+
+                    <div class="separator" style="margin: 20px 0; opacity: 0.3;"></div>
+
+                    <label class="group-label">About</label>
+                    <div style="font-size: 0.8rem; opacity: 0.7; line-height: 1.5;">
+                        <p><strong>Task Tracker Pro</strong></p>
+                        <p>A minimalist yet powerful tool to track your daily execution and long-term habits.</p>
+                        <p>Settings are saved locally in your browser.</p>
                     </div>
                 </div>
-            </div>
-
-            <hr class="separator">
-
-            <!-- Group 2: Data -->
-            <div class="settings-group">
-                <label class="group-label">Data Management</label>
-                <div class="data-controls">
-                    <button class="btn-data" onclick="exportData()">📤 Backup</button>
-                    <button class="btn-data" onclick="document.getElementById('importFile').click()">📥 Restore</button>
-                    <input type="file" id="importFile" style="display:none" accept=".json" onchange="importData(event)">
-                </div>
-                <button class="btn-danger-text" onclick="resetData()">Clear All Data (Factory Reset)</button>
             </div>
         </div>
     </div>
@@ -852,8 +1089,8 @@
         <div class="modal">
             <div class="modal-header">
                 <h2>Manage Habit Templates</h2>
-                <button class="close-btn"
-                    onclick="document.getElementById('templateModal').style.display='none'">✕</button>
+                <button class="close-btn" onclick="document.getElementById('templateModal').style.display='none'"><i
+                        class="fa-solid fa-xmark"></i></button>
             </div>
 
             <div class="settings-group">
@@ -900,7 +1137,15 @@
         // Core Data Initialization
         let tasks = JSON.parse(localStorage.getItem('tasks_v3')) || [];
         let log = JSON.parse(localStorage.getItem('log_v3')) || {};
-        let config = JSON.parse(localStorage.getItem('config_v4')) || { dark: true, color: '#00ff00' };
+        let config = JSON.parse(localStorage.getItem('config_v4')) || {
+            dark: true,
+            color: '#00ff00',
+            highlightColor: '#ff9800',
+            bg: null,
+            card: null,
+            text: null,
+            border: null
+        };
         let customTasks = JSON.parse(localStorage.getItem('custom_tasks_v1')) || {};
         let importantTasks = JSON.parse(localStorage.getItem('important_tasks_v1')) || {};
         let weeklyHabits = JSON.parse(localStorage.getItem('weekly_habits_v1')) || {};
@@ -1123,7 +1368,7 @@
             tasks.forEach((t, ti) => {
                 let row = `<tr><td><input class="task-input" value="${t.name}" oninput="updateName(${ti}, this.value)"></td>`;
                 for (let di = 0; di < 7; di++) row += `<td><input type="checkbox" ${t.schedule[di] ? 'checked' : ''} onchange="toggleSchedule(${ti}, ${di})"></td>`;
-                row += `<td><button onclick="delTask(${ti})" style="background:none; border:none; color:#ff5f5f; cursor:pointer;">✕</button></td></tr>`;
+                row += `<td><button onclick="delTask(${ti})" style="background:none; border:none; color:#ff5f5f; cursor:pointer;"><i class="fa-solid fa-trash-can"></i></button></td></tr>`;
                 b.innerHTML += row;
             });
         }
@@ -1139,9 +1384,11 @@
             for (let i = 0; i < 7; i++) {
                 let d = new Date(startOfWeek); d.setDate(startOfWeek.getDate() + i);
                 let dateKey = d.toISOString().split('T')[0];
+                let todayKey = new Date().toISOString().split('T')[0];
+                let isToday = dateKey === todayKey;
                 let dayIdx = (d.getDay() + 6) % 7;
 
-                let html = `<div class="day-column">
+                let html = `<div class="day-column ${isToday ? 'current-day' : ''}">
                 <div class="day-header">${daysName[i]} <small>${d.getDate()} ${monthsName[d.getMonth()]}</small></div>
                 <ul class="daily-list">`;
 
@@ -1186,7 +1433,7 @@
                             html += `<li class="task-item" style="border-left: 2px solid #9c27b0;" onclick="toggleLog('${dateKey}', '${wh.id}')">
                                 <input type="checkbox" ${isDone ? 'checked' : ''}>
                                 <span class="${isDone ? 'done' : ''}" style="flex-grow:1;">${wh.name} <small style="color:#9c27b0; font-size:0.6rem;">(Week Only)</small></span>
-                                <button onclick="deleteWeeklyHabit('${weekKey}', ${index}, event)" style="background:none; border:none; color:#999; cursor:pointer; font-size:0.7rem;">✕</button>
+                                <button onclick="deleteWeeklyHabit('${weekKey}', ${index}, event)" style="background:none; border:none; color:#999; cursor:pointer; font-size:0.75rem;"><i class="fa-solid fa-trash-can"></i></button>
                             </li>`;
                         }
                     });
@@ -1197,7 +1444,7 @@
 
                 html += `</ul>
                 <div style="text-align:center; padding-bottom:10px;">
-                    <button class="btn-icon" style="padding:4px 10px; font-size:0.7rem;" onclick="addCustomTask('${dateKey}')">+</button>
+                    <button class="btn-icon" style="padding:4px 10px; font-size:0.7rem;" onclick="addCustomTask('${dateKey}')"><i class="fa-solid fa-plus"></i></button>
                 </div>
                 <div class="progress-box"><div class="circle-wrapper">
                 <svg class="circle-svg" viewBox="0 0 60 60"><circle class="circle-bg" cx="30" cy="30" r="25"></circle>
@@ -1285,14 +1532,53 @@
         function toggleModal(s) { document.getElementById('modal').style.display = s ? 'flex' : 'none'; }
         function setDarkMode() { config.dark = !config.dark; applySettings(); }
         function setThemeColor(c) { config.color = c; applySettings(); }
+        function setHighlightColor(c) { config.highlightColor = c; applySettings(); }
+
+        function setCustomColor(key, val) {
+            config[key] = val;
+            applySettings();
+        }
+
+        function resetColors() {
+            if (!confirm("Reset all advanced colors to theme defaults?")) return;
+            config.bg = null;
+            config.card = null;
+            config.text = null;
+            config.border = null;
+            applySettings();
+        }
 
         function applySettings() {
             document.body.className = config.dark ? 'dark-mode' : '';
             document.getElementById('darkToggle').checked = config.dark;
             document.getElementById('colorPicker').value = config.color;
+            if (document.getElementById('highlightPicker')) document.getElementById('highlightPicker').value = config.highlightColor || '#ff9800';
+
+            // Set basic theme colors
             document.documentElement.style.setProperty('--primary', config.color);
             document.documentElement.style.setProperty('--primary-light', config.color + '22');
             document.documentElement.style.setProperty('--primary-ultra-light', config.color + '03');
+            document.documentElement.style.setProperty('--highlight', config.highlightColor || '#ff9800');
+
+            // Apply custom overrides if they exist, otherwise inherit from theme/dark-mode
+            if (config.bg) document.documentElement.style.setProperty('--bg', config.bg);
+            else document.documentElement.style.removeProperty('--bg');
+
+            if (config.card) document.documentElement.style.setProperty('--card', config.card);
+            else document.documentElement.style.removeProperty('--card');
+
+            if (config.text) document.documentElement.style.setProperty('--text', config.text);
+            else document.documentElement.style.removeProperty('--text');
+
+            if (config.border) document.documentElement.style.setProperty('--border', config.border);
+            else document.documentElement.style.removeProperty('--border');
+
+            // Update Advanced Color Picker values
+            if (document.getElementById('bgPicker')) document.getElementById('bgPicker').value = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#f4f7f6';
+            if (document.getElementById('cardPicker')) document.getElementById('cardPicker').value = getComputedStyle(document.documentElement).getPropertyValue('--card').trim() || '#ffffff';
+            if (document.getElementById('textPicker')) document.getElementById('textPicker').value = getComputedStyle(document.documentElement).getPropertyValue('--text').trim() || '#333333';
+            if (document.getElementById('borderPicker')) document.getElementById('borderPicker').value = getComputedStyle(document.documentElement).getPropertyValue('--border').trim() || '#dddddd';
+
             if (chart) { chart.data.datasets[0].borderColor = config.color; chart.data.datasets[0].backgroundColor = config.color + '22'; chart.update(); }
 
             if (config.wallpaper) {
@@ -1384,7 +1670,7 @@
                             <input type="checkbox" ${ct.done ? 'checked' : ''}>
                             <span class="${ct.done ? 'done' : ''}" style="font-size:1rem; margin-left:10px;">${ct.name}</span>
                         </div>
-                        <button onclick="removeImportantTask('${dateKey}', '${ct.id}')" style="background:none; border:none; color:#ff5f5f; cursor:pointer;">✕</button>
+                        <button onclick="removeImportantTask('${dateKey}', '${ct.id}')" style="background:none; border:none; color:#ff5f5f; cursor:pointer;"><i class="fa-solid fa-trash-can"></i></button>
                     </li>`;
                 });
             } else {
@@ -1513,7 +1799,7 @@
                     </div>
                     <div style="display:flex; gap:5px;">
                         <button class="btn-sm" onclick="loadTemplate('${name}')">Load</button>
-                        <button class="btn-icon" style="color:#ff5f5f; font-size:0.9rem;" onclick="deleteTemplate('${name}')">🗑</button>
+                        <button class="btn-icon" style="color:#ff5f5f; font-size:1rem; padding: 5px 10px;" onclick="deleteTemplate('${name}')"><i class="fa-solid fa-trash-can"></i></button>
                     </div>
                 </div>`;
             });
@@ -1552,9 +1838,19 @@
             const hoursStr = String(hours).padStart(2, '0');
             const minutes = String(now.getMinutes()).padStart(2, '0');
             const seconds = String(now.getSeconds()).padStart(2, '0');
+
+            const dayName = now.toLocaleDateString('en-US', { weekday: 'long' });
+            const monthName = monthsName[now.getMonth()];
+            const date = now.getDate();
+            const year = now.getFullYear();
+
             const timeString = `${hoursStr}:${minutes}:${seconds} ${ampm}`;
+            const dateString = `<span class="clock-day">${dayName}</span>, ${monthName} ${date}, ${year}`;
+
             const clockEl = document.getElementById('digitalClock');
-            if (clockEl) clockEl.innerText = timeString;
+            if (clockEl) {
+                clockEl.innerHTML = `${hoursStr}:${minutes}:<span class="clock-seconds">${seconds}</span> ${ampm}<span class="clock-date">${dateString}</span>`;
+            }
         }
 
         init();
