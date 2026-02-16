@@ -27,6 +27,56 @@
             --primary-light: #2a2a2a;
         }
 
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes glowPulse {
+            0% {
+                box-shadow: 0 0 5px var(--primary);
+            }
+
+            50% {
+                box-shadow: 0 0 20px var(--primary);
+            }
+
+            100% {
+                box-shadow: 0 0 5px var(--primary);
+            }
+        }
+
         body {
             font-family: 'Inter', system-ui, sans-serif;
             background: var(--bg);
@@ -42,8 +92,10 @@
         }
 
         .container {
-            max-width: 1000px;
-            margin: 0 auto;
+            width: 100%;
+            max-width: 100vw;
+            margin: 0;
+            box-sizing: border-box;
         }
 
         header {
@@ -51,29 +103,50 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
+            animation: fadeInUp 0.6s ease-out;
         }
 
         .btn-icon {
             background: var(--primary);
             color: white;
-            border: none;
+            border: 2px solid var(--primary);
             padding: 8px 15px;
             border-radius: 20px;
             cursor: pointer;
             font-weight: bold;
             font-size: 0.8rem;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .btn-icon:hover {
+            transform: scale(1.1);
+            background: var(--card);
+            color: var(--primary);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
 
         .btn-outline {
             background: transparent;
             color: var(--primary);
             border: 2px solid var(--primary);
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
         }
 
         .btn-danger {
             background: #ff5f5f;
             color: white;
-            border: none;
+            border: 2px solid #ff5f5f;
+            transition: all 0.3s ease;
+        }
+
+        .btn-danger:hover {
+            background: var(--card);
+            color: #ff5f5f;
         }
 
         .card {
@@ -83,6 +156,13 @@
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
             margin-bottom: 20px;
             border: 1px solid var(--border);
+            animation: fadeInUp 0.8s ease-out both;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
         }
 
         .section-title {
@@ -167,11 +247,17 @@
             font-size: 0.75rem;
             font-weight: 600;
             color: var(--primary);
+            transition: all 0.3s ease;
         }
 
         .period-btn.active {
             background: var(--primary);
             color: white;
+        }
+
+        .period-btn:not(.active):hover {
+            background: var(--card);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         .range-inputs {
@@ -205,6 +291,41 @@
             display: flex;
             flex-direction: column;
             min-height: 220px;
+            animation: fadeInUp 0.6s ease-out both;
+            transition: all 0.3s ease;
+        }
+
+        .day-column:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .day-column:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .day-column:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .day-column:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        .day-column:nth-child(4) {
+            animation-delay: 0.4s;
+        }
+
+        .day-column:nth-child(5) {
+            animation-delay: 0.5s;
+        }
+
+        .day-column:nth-child(6) {
+            animation-delay: 0.6s;
+        }
+
+        .day-column:nth-child(7) {
+            animation-delay: 0.7s;
         }
 
         .day-header {
@@ -237,11 +358,13 @@
             cursor: pointer;
             padding: 5px;
             border-radius: 5px;
-            transition: 0.2s;
+            transition: all 0.3s ease;
+            animation: slideInRight 0.3s ease-out both;
         }
 
         .task-item:hover {
             background: var(--primary-light);
+            transform: translateX(5px);
         }
 
         .task-item input {
@@ -309,6 +432,8 @@
             justify-content: center;
             align-items: center;
             z-index: 1000;
+            backdrop-filter: blur(5px);
+            transition: opacity 0.3s ease;
         }
 
         .modal {
@@ -319,6 +444,7 @@
             max-width: 420px;
             max-height: 90vh;
             overflow-y: auto;
+            animation: scaleIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         .setting-row {
@@ -356,7 +482,7 @@
             bottom: 0;
             background: #ccc;
             border-radius: 20px;
-            transition: .4s;
+            transition: background 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .slider:before {
@@ -368,7 +494,12 @@
             bottom: 3px;
             background: white;
             border-radius: 50%;
-            transition: .4s;
+            transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        input:active+.slider:before {
+            transform: scale(1.2);
         }
 
         input:checked+.slider {
@@ -409,19 +540,19 @@
 
         .digital-clock {
             font-family: 'Orbitron', sans-serif;
-            font-size: 2.2rem;
+            font-size: 2rem;
             font-weight: 900;
             color: var(--primary);
             background: var(--primary-ultra-light);
-            padding: 15px 10px;
-            border-radius: 10px;
+            padding: 12px 20px;
+            border-radius: 12px;
             border: 3px solid var(--primary);
             text-align: center;
-            width: 100%;
-            margin-bottom: 20px;
             letter-spacing: 2px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
             line-height: 1.2;
+            white-space: nowrap;
+            flex-grow: 1;
         }
 
         .clock-date {
@@ -431,6 +562,7 @@
             opacity: 0.8;
             margin-top: 5px;
             font-weight: 500;
+            margin-left: 10px;
         }
 
         .clock-day {
@@ -445,10 +577,61 @@
             margin: 0 5px;
         }
 
+        .clock-quote-input {
+            background: var(--primary-light);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-size: 0.85rem;
+            font-style: italic;
+            text-align: center;
+            width: fit-content;
+            max-width: 80%;
+            margin-top: 20px;
+            padding: 8px 20px;
+            border-radius: 30px;
+            opacity: 0.8;
+            outline: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+        }
+
+        .clock-quote-input:hover,
+        .clock-quote-input:focus {
+            opacity: 1;
+            transform: scale(1.02);
+            background: var(--card);
+            border-color: var(--primary);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
         .day-column.current-day {
             border: 2px solid var(--highlight);
             box-shadow: 0 0 15px rgba(255, 152, 0, 0.2);
             position: relative;
+            animation: glowPulseOrange 2s infinite;
+        }
+
+        @keyframes glowPulseOrange {
+            0% {
+                box-shadow: 0 0 5px var(--highlight);
+            }
+
+            50% {
+                box-shadow: 0 0 15px var(--highlight);
+            }
+
+            100% {
+                box-shadow: 0 0 5px var(--highlight);
+            }
+        }
+
+        .day-column.selected-day {
+            border: 2px solid var(--primary);
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.2);
+            transform: translateY(-5px);
+            z-index: 5;
+            animation: glowPulse 2s infinite;
         }
 
         .day-column.current-day .day-header {
@@ -617,6 +800,24 @@
             flex-direction: column;
         }
 
+        @media (max-width: 1000px) {
+            .header-content {
+                flex-direction: column !important;
+                align-items: center !important;
+                text-align: center !important;
+            }
+
+            .profile-section,
+            .digital-clock {
+                width: 100% !important;
+                min-width: unset !important;
+            }
+
+            .profile-name {
+                text-align: center !important;
+            }
+        }
+
         @media (max-width: 850px) {
             .dashboard-row {
                 flex-direction: column;
@@ -683,18 +884,25 @@
 
         .close-btn {
             background: none;
-            border: none;
+            border: 2px solid transparent;
             font-size: 1.2rem;
             cursor: pointer;
             color: var(--text);
             padding: 5px;
             border-radius: 50%;
-            transition: 0.2s;
+            transition: all 0.3s ease;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .close-btn:hover {
-            background: var(--primary-light);
+            background: var(--card);
             color: var(--primary);
+            border-color: var(--primary);
+            transform: rotate(90deg);
         }
 
         .settings-group {
@@ -758,13 +966,15 @@
             background: var(--bg);
             color: var(--text);
             cursor: pointer;
-            transition: 0.2s;
+            transition: all 0.3s ease;
             flex: 1;
         }
 
         .btn-sm:hover {
+            background: var(--card);
             border-color: var(--primary);
             color: var(--primary);
+            transform: translateY(-2px);
         }
 
         .btn-sm.primary {
@@ -824,6 +1034,78 @@
             background: var(--border);
             margin: 10px 0 20px 0;
         }
+
+        /* Adherence Progress Bar styles */
+        .adherence-container {
+            width: 100%;
+            height: 12px;
+            background: var(--border);
+            border-radius: 6px;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+
+        .adherence-fill {
+            height: 100%;
+            background: var(--primary);
+            transition: width 0.3s ease;
+        }
+
+        .adherence-text {
+            font-size: 0.7rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .adherence-nav {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 10px;
+            background: var(--primary-ultra-light);
+            padding: 4px;
+            border-radius: 20px;
+            width: fit-content;
+        }
+
+        .adherence-btn {
+            border: 1px solid transparent;
+            background: transparent;
+            padding: 4px 10px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: var(--primary);
+            transition: all 0.3s ease;
+        }
+
+        .adherence-btn:not(.active):hover {
+            background: var(--card);
+            border-color: var(--primary);
+            transform: translateY(-1px);
+        }
+
+        .adherence-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .adherence-custom-range {
+            display: none;
+            gap: 5px;
+            align-items: center;
+            font-size: 0.7rem;
+            margin-bottom: 10px;
+        }
+
+        .adherence-custom-range input {
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 2px 5px;
+            font-size: 0.7rem;
+            background: var(--card);
+            color: var(--text);
+        }
     </style>
 </head>
 
@@ -831,23 +1113,37 @@
 
     <div class="container">
         <header>
-            <div class="header-content" style="width:100%">
-                <div class="profile-section">
-                    <div id="digitalClock" class="digital-clock">00:00:00 AM</div>
-                    <div class="profile-row">
-                        <input type="text" class="profile-name" id="userName" value="Achiever"
-                            oninput="updateProfile('name', this.value)" placeholder="Your Name">
+            <div class="header-content" style="width:100%; display: flex; flex-direction: column; gap: 20px;">
+                <!-- Top Row: Profile & Clock -->
+                <div
+                    style="display: flex; justify-content: space-between; align-items: stretch; gap: 20px; width: 100%;">
+                    <div class="profile-section"
+                        style="flex: 1.5; min-width: 300px; display: flex; flex-direction: column; justify-content: center;">
+                        <div class="profile-row">
+                            <input type="text" class="profile-name" id="userName" value="Achiever"
+                                oninput="updateProfile('name', this.value)" placeholder="Your Name"
+                                style="font-size: 2.2rem; margin-bottom: 0;">
+                        </div>
+                        <div class="quote-container" style="flex-grow: 1;">
+                            <input type="text" class="profile-quote" id="userQuote" value="Make it happen."
+                                oninput="updateProfile('quote', this.value)" placeholder="Your motivational quote..."
+                                style="font-size: 1rem;">
+                            <button class="btn-inspire" onclick="setRandomQuote()" title="Get Inspired"><i
+                                    class="fa-solid fa-wand-magic-sparkles"></i></button>
+                        </div>
                     </div>
-                    <div class="quote-container">
-                        <input type="text" class="profile-quote" id="userQuote" value="Make it happen."
-                            oninput="updateProfile('quote', this.value)" placeholder="Your motivational quote...">
-                        <button class="btn-inspire" onclick="setRandomQuote()" title="Get Inspired"><i
-                                class="fa-solid fa-wand-magic-sparkles"></i></button>
+                    <div
+                        style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                        <div id="digitalClock" class="digital-clock">00:00:00 AM</div>
+                        <input type="text" id="clockQuote" class="clock-quote-input"
+                            oninput="updateProfile('clockQuote', this.value)" placeholder="Something motivational...">
                     </div>
                 </div>
 
-                <div style="display:flex; gap: 20px; align-items:center;">
-                    <div class="stats-container">
+                <!-- Bottom Row: Stats & Settings -->
+                <div
+                    style="display:flex; gap: 25px; align-items:center; justify-content: center; width: 100%; padding-top: 5px;">
+                    <div class="stats-container" style="padding: 10px 20px; flex-grow: 0;">
                         <div class="stat-item" title="Growth vs Previous Week">
                             <span class="stat-icon"><i class="fa-solid fa-chart-line"></i></span>
                             <span class="stat-label">vs Last Wk:</span>
@@ -860,17 +1156,19 @@
                         </div>
                     </div>
 
-                    <div class="weekly-progress-container">
-                        <svg class="weekly-svg" viewBox="0 0 100 100">
+                    <div class="weekly-progress-container" style="width: 80px; height: 80px;">
+                        <svg class="weekly-svg" style="width: 70px; height: 70px;" viewBox="0 0 100 100">
                             <circle class="weekly-bg" cx="50" cy="50" r="40"></circle>
                             <circle class="weekly-bar" id="weeklyBar" cx="50" cy="50" r="40"
                                 style="stroke-dasharray: 251; stroke-dashoffset: 251;"></circle>
                         </svg>
-                        <span class="weekly-text" id="weeklyText">0%</span>
-                        <span class="weekly-label">Weekly Progress</span>
+                        <span class="weekly-text" id="weeklyText" style="font-size: 1rem;">0%</span>
+                        <span class="weekly-label" style="font-size: 0.6rem; bottom: -20px;">Weekly Progress</span>
                     </div>
-                    <div><button class="btn-icon btn-outline" onclick="toggleModal(true)"
-                            style="padding: 10px; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;"><i
+
+                    <div style="margin-left: 10px;">
+                        <button class="btn-icon btn-outline" onclick="toggleModal(true)"
+                            style="padding: 12px; border-radius: 50%; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;"><i
                                 class="fa-solid fa-gear"></i></button>
                     </div>
                 </div>
@@ -879,13 +1177,28 @@
 
         <div class="dashboard-row">
             <!-- HABITS CONFIG -->
-            <div class="card">
+            <div class="card" style="flex: 2;">
                 <div class="section-title">
                     Habit Templates (Weekly)
                     <button class="btn-icon btn-outline" style="font-size:0.75rem; padding:4px 10px;"
                         onclick="openTemplateModal()"><i class="fa-solid fa-folder-open"></i> Manage Templates</button>
                 </div>
                 <div class="table-wrapper">
+                    <div class="adherence-nav">
+                        <button class="adherence-btn active" id="adh-month"
+                            onclick="switchAdherencePeriod('month')">Month</button>
+                        <button class="adherence-btn" id="adh-week"
+                            onclick="switchAdherencePeriod('week')">Week</button>
+                        <button class="adherence-btn" id="adh-year"
+                            onclick="switchAdherencePeriod('year')">Year</button>
+                        <button class="adherence-btn" id="adh-range"
+                            onclick="switchAdherencePeriod('range')">Range</button>
+                    </div>
+                    <div id="adherenceRangeSelector" class="adherence-custom-range">
+                        <input type="date" id="adhStartDate" onchange="switchAdherencePeriod('range')">
+                        <span>to</span>
+                        <input type="date" id="adhEndDate" onchange="switchAdherencePeriod('range')">
+                    </div>
                     <table class="manager-table">
                         <thead>
                             <tr>
@@ -897,6 +1210,7 @@
                                 <th>F</th>
                                 <th>S</th>
                                 <th>S</th>
+                                <th style="min-width: 150px;">Adherence</th>
                                 <th>✕</th>
                             </tr>
                         </thead>
@@ -908,9 +1222,9 @@
             </div>
 
             <!-- TODAY'S IMPORTANT TASKS -->
-            <div class="card" style="border-left: 5px solid #ff9800;">
-                <div class="section-title" style="border-color: #ff9800; color: #ff9800;">
-                    Today's Important Tasks
+            <div class="card" style="border-left: 5px solid #ff9800; flex: 1;">
+                <div class="section-title" id="highlightTitle" style="border-color: #ff9800; color: #ff9800;">
+                    Daily Highlight
                     <span id="todayDateDisplay" style="font-size:0.9rem; color:var(--text); font-weight:normal;"></span>
                 </div>
 
@@ -1150,12 +1464,23 @@
         let importantTasks = JSON.parse(localStorage.getItem('important_tasks_v1')) || {};
         let weeklyHabits = JSON.parse(localStorage.getItem('weekly_habits_v1')) || {};
         let habitTemplates = JSON.parse(localStorage.getItem('habit_templates_v1')) || {};
-        let userProfile = JSON.parse(localStorage.getItem('profile_v1')) || { name: 'Achiever', quote: 'Make it happen.' };
+        let userProfile = JSON.parse(localStorage.getItem('profile_v1')) || {
+            name: 'Achiever',
+            quote: 'Make it happen.',
+            clockQuote: 'I am continue , are you ?'
+        };
+
+        // Post-load data migrations
+        tasks.forEach(t => {
+            if (!t.startDate) t.startDate = new Date(2025, 0, 1).toISOString().split('T')[0]; // Default for legacy
+        });
 
         let chart;
         let currentPeriod = 'week';
         let viewDate = new Date();
         let targetDateKey = null;
+        let adherencePeriod = 'month';
+        let selectedHighlightDate = new Date().toISOString().split('T')[0];
 
         function init() {
             initChart();
@@ -1224,7 +1549,13 @@
         }
 
         function addTask() {
-            tasks.push({ id: 'id_' + Date.now(), name: "New Habit", schedule: [true, true, true, true, true, false, false] });
+            const today = new Date().toISOString().split('T')[0];
+            tasks.push({
+                id: 'id_' + Date.now(),
+                name: "New Habit",
+                schedule: [true, true, true, true, true, false, false],
+                startDate: today
+            });
             save(); renderTable(); renderGrid(); updateAnalytics(); renderTodayHighlight();
         }
 
@@ -1235,10 +1566,15 @@
         function toggleLog(dateKey, taskId) {
             if (!log[dateKey]) log[dateKey] = {};
             log[dateKey][taskId] = !log[dateKey][taskId];
-            save(); renderGrid(); updateAnalytics(); renderTodayHighlight();
+            save(); renderGrid(); renderTable(); updateAnalytics(); renderTodayHighlight();
         }
 
-        function delTask(idx) { if (confirm("Delete habit?")) { tasks.splice(idx, 1); save(); renderTable(); renderGrid(); updateAnalytics(); renderTodayHighlight(); } }
+        function delTask(idx) {
+            if (confirm("Delete habit? Its history will be preserved if you delete it this way.")) {
+                tasks[idx].deletedDate = new Date().toISOString().split('T')[0];
+                save(); renderTable(); renderGrid(); updateAnalytics(); renderTodayHighlight();
+            }
+        }
 
         function resetData() { if (confirm("This will permanently delete ALL progress. Continue?")) { localStorage.clear(); location.reload(); } }
 
@@ -1287,6 +1623,9 @@
         function loadProfile() {
             document.getElementById('userName').value = userProfile.name;
             document.getElementById('userQuote').value = userProfile.quote;
+            if (document.getElementById('clockQuote')) {
+                document.getElementById('clockQuote').value = userProfile.clockQuote || 'i am contine , are you ?';
+            }
         }
 
         function updateProfile(field, value) {
@@ -1314,6 +1653,9 @@
                 let dIdx = (d.getDay() + 6) % 7;
 
                 tasks.forEach(t => {
+                    if (t.deletedDate && dateKey >= t.deletedDate) return;
+                    if (dateKey < t.startDate) return;
+
                     if (t.schedule[dIdx]) {
                         total++;
                         if (log[dateKey] && log[dateKey][t.id]) done++;
@@ -1365,12 +1707,70 @@
         // --- UI RENDERING ---
         function renderTable() {
             const b = document.getElementById('masterBody'); b.innerHTML = '';
+
+            let start, end;
+            const today = new Date();
+            if (adherencePeriod === 'week') {
+                start = getMonday(new Date());
+                end = new Date(start); end.setDate(start.getDate() + 6);
+            } else if (adherencePeriod === 'month') {
+                start = new Date(today.getFullYear(), today.getMonth(), 1);
+                end = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            } else if (adherencePeriod === 'year') {
+                start = new Date(today.getFullYear(), 0, 1);
+                end = new Date(today.getFullYear(), 11, 31);
+            } else if (adherencePeriod === 'range') {
+                start = new Date(document.getElementById('adhStartDate').value || today);
+                end = new Date(document.getElementById('adhEndDate').value || today);
+                if (start > end) [start, end] = [end, start];
+            }
+
             tasks.forEach((t, ti) => {
-                let row = `<tr><td><input class="task-input" value="${t.name}" oninput="updateName(${ti}, this.value)"></td>`;
+                if (t.deletedDate) return; // Only show active habits in manager
+
+                const adherence = getHabitAdherence(t.id, start, end);
+                let row = `<tr>
+                    <td><input class="task-input" value="${t.name}" oninput="updateName(${ti}, this.value)"></td>`;
                 for (let di = 0; di < 7; di++) row += `<td><input type="checkbox" ${t.schedule[di] ? 'checked' : ''} onchange="toggleSchedule(${ti}, ${di})"></td>`;
+                row += `<td>
+                        <div class="adherence-text">${adherence}%</div>
+                        <div class="adherence-container">
+                            <div class="adherence-fill" style="width: ${adherence}%"></div>
+                        </div>
+                    </td>`;
                 row += `<td><button onclick="delTask(${ti})" style="background:none; border:none; color:#ff5f5f; cursor:pointer;"><i class="fa-solid fa-trash-can"></i></button></td></tr>`;
                 b.innerHTML += row;
             });
+        }
+
+        function switchAdherencePeriod(p) {
+            adherencePeriod = p;
+            document.querySelectorAll('.adherence-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('adh-' + p).classList.add('active');
+            document.getElementById('adherenceRangeSelector').style.display = (p === 'range') ? 'flex' : 'none';
+            renderTable();
+        }
+
+        function getHabitAdherence(taskId, start, end) {
+            let total = 0, done = 0;
+            let curr = new Date(start);
+            while (curr <= end) {
+                let dateKey = curr.toISOString().split('T')[0];
+                let dIdx = (curr.getDay() + 6) % 7;
+
+                const task = tasks.find(t => t.id === taskId);
+                if (task) {
+                    if (task.deletedDate && dateKey >= task.deletedDate) { curr.setDate(curr.getDate() + 1); continue; }
+                    if (dateKey < task.startDate) { curr.setDate(curr.getDate() + 1); continue; }
+
+                    if (task.schedule[dIdx]) {
+                        total++;
+                        if (log[dateKey] && log[dateKey][taskId]) done++;
+                    }
+                }
+                curr.setDate(curr.getDate() + 1);
+            }
+            return total ? Math.round((done / total) * 100) : 0;
         }
 
         function renderGrid() {
@@ -1386,9 +1786,10 @@
                 let dateKey = d.toISOString().split('T')[0];
                 let todayKey = new Date().toISOString().split('T')[0];
                 let isToday = dateKey === todayKey;
+                let isSelected = dateKey === selectedHighlightDate;
                 let dayIdx = (d.getDay() + 6) % 7;
 
-                let html = `<div class="day-column ${isToday ? 'current-day' : ''}">
+                let html = `<div class="day-column ${isToday ? 'current-day' : ''} ${isSelected ? 'selected-day' : ''}" onclick="selectDayForHighlight('${dateKey}')">
                 <div class="day-header">${daysName[i]} <small>${d.getDate()} ${monthsName[d.getMonth()]}</small></div>
                 <ul class="daily-list">`;
 
@@ -1396,6 +1797,9 @@
 
                 // Regular Habits
                 tasks.forEach(t => {
+                    if (t.deletedDate && dateKey >= t.deletedDate) return;
+                    if (dateKey < t.startDate) return;
+
                     if (t.schedule[dayIdx]) {
                         total++;
                         let isDone = log[dateKey] && log[dateKey][t.id];
@@ -1501,7 +1905,11 @@
             let total = 0, done = 0;
 
             // Regular Habits
-            tasks.forEach(t => { if (t.schedule[dIdx]) { total++; if (log[dateKey] && log[dateKey][t.id]) done++; } });
+            tasks.forEach(t => {
+                if (t.deletedDate && dateKey >= t.deletedDate) return;
+                if (dateKey < t.startDate) return;
+                if (t.schedule[dIdx]) { total++; if (log[dateKey] && log[dateKey][t.id]) done++; }
+            });
 
             // Custom Tasks
             if (customTasks[dateKey]) {
@@ -1620,7 +2028,7 @@
         function addTodayTask() {
             const name = document.getElementById('todayTaskInput').value;
             if (!name) return;
-            const dateKey = new Date().toISOString().split('T')[0];
+            const dateKey = selectedHighlightDate;
             if (!importantTasks[dateKey]) importantTasks[dateKey] = [];
 
             importantTasks[dateKey].push({
@@ -1652,15 +2060,32 @@
             save(); renderTodayHighlight();
         }
 
+        function selectDayForHighlight(dateKey) {
+            selectedHighlightDate = dateKey;
+            renderGrid();
+            renderTodayHighlight();
+        }
+
         function renderTodayHighlight() {
             const list = document.getElementById('todayTaskList');
             const dateDisplay = document.getElementById('todayDateDisplay');
+            const highlightTitle = document.getElementById('highlightTitle');
             if (!list || !dateDisplay) return;
 
-            const today = new Date();
-            const dateKey = today.toISOString().split('T')[0];
+            const selectedDate = new Date(selectedHighlightDate);
+            const dateKey = selectedHighlightDate;
+            const todayKey = new Date().toISOString().split('T')[0];
 
-            dateDisplay.innerText = today.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+            if (dateKey === todayKey) {
+                highlightTitle.innerHTML = `Today's Highlight <span id="todayDateDisplay" style="font-size:0.9rem; color:var(--text); font-weight:normal;"></span>`;
+            } else {
+                highlightTitle.innerHTML = `Highlight for ${daysName[(selectedDate.getDay() + 6) % 7]} <span id="todayDateDisplay" style="font-size:0.9rem; color:var(--text); font-weight:normal;"></span>`;
+            }
+
+            // Need to re-get because innerHTML clears it
+            const newDateDisplay = document.getElementById('todayDateDisplay');
+            newDateDisplay.innerText = selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
             list.innerHTML = '';
 
             if (importantTasks[dateKey] && importantTasks[dateKey].length > 0) {
