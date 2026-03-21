@@ -27,6 +27,10 @@
             --primary-light: #2a2a2a;
         }
 
+        :root {
+            --card-bg: color-mix(in srgb, var(--card), transparent var(--card-transparency, 0%));
+        }
+
         @keyframes fadeInUp {
             from {
                 opacity: 0;
@@ -150,7 +154,8 @@
         }
 
         .card {
-            background: var(--card);
+            background: var(--card-bg);
+            backdrop-filter: blur(8px);
             border-radius: 12px;
             padding: 15px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
@@ -284,7 +289,8 @@
         }
 
         .day-column {
-            background: var(--card);
+            background: var(--card-bg);
+            backdrop-filter: blur(8px);
             border-radius: 10px;
             border: 1px solid var(--border);
             overflow: hidden;
@@ -437,7 +443,8 @@
         }
 
         .modal {
-            background: var(--card);
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
             padding: 25px;
             border-radius: 15px;
             width: 90%;
@@ -712,6 +719,20 @@
             border-radius: 8px;
             border: 1px solid var(--border);
             color: var(--primary);
+        }
+
+        .options-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 25px;
+            background: var(--card-bg); /* Apply transparent background */
+            backdrop-filter: blur(10px);
+            min-width: 150px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            z-index: 1001;
         }
 
         .stat-label {
@@ -1106,6 +1127,72 @@
             background: var(--card);
             color: var(--text);
         }
+
+        /* Options Dropdown */
+        .options-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .options-menu {
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            display: none;
+            flex-direction: column;
+            min-width: 140px;
+            z-index: 1000;
+            padding: 5px 0;
+        }
+
+        .options-menu.active {
+            display: flex;
+        }
+
+        .option-item {
+            padding: 8px 12px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text);
+            transition: background 0.2s;
+        }
+
+        .option-item:hover {
+            background: var(--primary-light);
+        }
+
+        .drag-handle {
+            cursor: grab;
+            opacity: 0.3;
+            transition: 0.2s;
+        }
+
+        .drag-handle:hover {
+            opacity: 1;
+            color: var(--primary);
+        }
+
+        .dragging {
+            opacity: 0.5;
+            background: var(--primary-ultra-light);
+        }
+
+        .task-star {
+            color: #ffd700;
+            font-size: 0.9rem;
+            margin-right: 5px;
+        }
+
+        .habit-row:hover .drag-handle {
+            opacity: 0.7;
+        }
     </style>
 </head>
 
@@ -1177,10 +1264,10 @@
 
         <div class="dashboard-row">
             <!-- HABITS CONFIG -->
-            <div class="card" style="flex: 2;">
-                <div class="section-title">
+            <div class="card" style="flex: 1; border-left: 5px solid var(--habit-color); background: var(--habit-bg);">
+                <div class="section-title" style="border-color: var(--habit-color); color: var(--habit-color);">
                     Habit Templates (Weekly)
-                    <button class="btn-icon btn-outline" style="font-size:0.75rem; padding:4px 10px;"
+                    <button class="btn-icon btn-outline" style="font-size:0.75rem; padding:4px 10px; border-color:var(--habit-color); color:var(--habit-color);"
                         onclick="openTemplateModal()"><i class="fa-solid fa-folder-open"></i> Manage Templates</button>
                 </div>
                 <div class="table-wrapper">
@@ -1202,6 +1289,7 @@
                     <table class="manager-table">
                         <thead>
                             <tr>
+                                <th style="width: 30px;"></th>
                                 <th style="text-align:left;">Habit Name</th>
                                 <th>M</th>
                                 <th>T</th>
@@ -1211,7 +1299,8 @@
                                 <th>S</th>
                                 <th>S</th>
                                 <th style="min-width: 150px;">Adherence</th>
-                                <th>✕</th>
+                                <th>Time</th>
+                                <th style="width: 50px;"><i class="fa-solid fa-ellipsis-vertical"></i></th>
                             </tr>
                         </thead>
                         <tbody id="masterBody"></tbody>
@@ -1220,25 +1309,59 @@
                 <button class="btn-icon" style="width:100%; margin-top: auto; padding-top:15px; border-radius:8px;"
                     onclick="addTask()"><i class="fa-solid fa-plus"></i> Add New Habit</button>
             </div>
+        </div>
 
+        <div class="dashboard-row">
             <!-- TODAY'S IMPORTANT TASKS -->
-            <div class="card" style="border-left: 5px solid #ff9800; flex: 1;">
-                <div class="section-title" id="highlightTitle" style="border-color: #ff9800; color: #ff9800;">
+            <div class="card" style="border-left: 5px solid var(--highlight-card); flex: 1; background: var(--highlight-bg);">
+                <div class="section-title" id="highlightTitle" style="border-color: var(--highlight-card); color: var(--highlight-card);">
                     Daily Highlight
                     <span id="todayDateDisplay" style="font-size:0.9rem; color:var(--text); font-weight:normal;"></span>
                 </div>
 
                 <div style="display:flex; gap:10px; margin-bottom:15px;">
                     <input type="text" id="todayTaskInput" class="task-input"
-                        style="border:1px solid var(--border); padding:10px; border-radius:5px; background:var(--bg);"
+                        style="border:1px solid var(--border); padding:10px; border-radius:5px; background:var(--card-bg);"
                         placeholder="What's important today?">
-                    <button class="btn-icon" style="background:#ff9800;" onclick="addTodayTask()"><i
+                    <button class="btn-icon" style="background:var(--highlight-card); border-color:var(--highlight-card);" onclick="addTodayTask()"><i
                             class="fa-solid fa-plus"></i> Add</button>
                 </div>
 
                 <ul class="daily-list" id="todayTaskList" style="flex-grow:1;"></ul>
             </div>
+
+            <!-- STICKY NOTES / GOALS -->
+            <div class="card" style="border-left: 5px solid var(--sticky-color); flex: 1; background: var(--sticky-bg);">
+                <div class="section-title" style="border-color: var(--sticky-color); color: var(--sticky-color);">
+                    Sticky Notes / Goals
+                    <span style="font-size:0.7rem; color:var(--text); opacity: 0.6; font-weight:normal;">(Separate list)</span>
+                </div>
+
+
+                <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:15px; background:var(--card-bg); padding:10px; border-radius:8px;">
+                    <input type="text" id="scheduledTaskInput" class="task-input"
+                        style="border:1px solid var(--border); padding:8px; border-radius:5px; background:var(--card);"
+                        placeholder="New planned task...">
+                    <div style="display:flex; gap:5px; align-items:center; flex-wrap:wrap;">
+                        <select id="scheduledTaskMode" onchange="toggleScheduledRangeVisibility()" style="background:var(--card); color:var(--text); border:1px solid var(--border); border-radius:5px; padding:4px; font-size:0.8rem;">
+                            <option value="forever">Forever</option>
+                            <option value="range">Date Range</option>
+                        </select>
+                        <div id="scheduledRangeInputs" style="display:none; gap:5px; align-items:center;">
+                            <input type="date" id="schedStart" style="font-size:0.7rem; background:var(--card); color:var(--text); border:1px solid var(--border); border-radius:4px; padding:2px;">
+                            <input type="date" id="schedEnd" style="font-size:0.7rem; background:var(--card); color:var(--text); border:1px solid var(--border); border-radius:4px; padding:2px;">
+                        </div>
+                    </div>
+                    <button class="btn-icon" style="background:#00bcd4; width:100%; border-color:#00bcd4; color: white;" onclick="addScheduledTask()">
+                        <i class="fa-solid fa-plus"></i> Add
+                    </button>
+                </div>
+
+                <ul class="daily-list" id="scheduledTaskList" style="flex-grow:1;"></ul>
+            </div>
         </div>
+
+
 
         <!-- ANALYTICS -->
         <div class="card">
@@ -1293,6 +1416,14 @@
                     </div>
 
                     <div class="setting-item">
+                        <span class="setting-text">Allow Past/Future Edits</span>
+                        <label class="switch">
+                            <input type="checkbox" id="editAllDaysToggle" onchange="toggleEditAllDays()">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="setting-item">
                         <span class="setting-text">Theme Color</span>
                         <div class="color-wrapper" onclick="document.getElementById('colorPicker').click()">
                             <input type="color" id="colorPicker" oninput="setThemeColor(this.value)"
@@ -1302,10 +1433,37 @@
 
                     <div class="setting-item">
                         <span class="setting-text">Today Highlight Color</span>
-                        <div class="color-wrapper" style="background:var(--highlight)"
+                        <div class="color-wrapper" style="background:var(--highlight-card)"
                             onclick="document.getElementById('highlightPicker').click()">
-                            <input type="color" id="highlightPicker" oninput="setHighlightColor(this.value)"
+                            <input type="color" id="highlightPicker" oninput="setCustomColor('highlightCardColor', this.value)"
                                 style="width:100%; height:100%; opacity:0; cursor:pointer;">
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <span class="setting-text">Sticky Notes Color</span>
+                        <div class="color-wrapper" style="background:var(--sticky-color)"
+                            onclick="document.getElementById('stickyPicker').click()">
+                            <input type="color" id="stickyPicker" oninput="setCustomColor('stickyColor', this.value)"
+                                style="width:100%; height:100%; opacity:0; cursor:pointer;">
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <span class="setting-text">Habit Table Color</span>
+                        <div class="color-wrapper" style="background:var(--habit-color)"
+                            onclick="document.getElementById('habitPicker').click()">
+                            <input type="color" id="habitPicker" oninput="setCustomColor('habitColor', this.value)"
+                                style="width:100%; height:100%; opacity:0; cursor:pointer;">
+                        </div>
+                    </div>
+
+                    <div class="setting-item" style="flex-direction:column; align-items:flex-start; gap:8px;">
+                        <span class="setting-text">Card Transparency</span>
+                        <div style="display:flex; align-items:center; gap:10px; width:100%;">
+                            <input type="range" id="cardTransparency" min="0" max="95" step="5" value="0" 
+                                oninput="setCustomColor('cardTransparency', this.value)" style="flex-grow:1; accent-color:var(--primary);">
+                            <span id="transparencyValue" style="font-size:0.8rem; min-width:30px;">0%</span>
                         </div>
                     </div>
 
@@ -1444,6 +1602,16 @@
         </div>
     </div>
 
+    <!-- ALERT MODAL -->
+    <div class="modal-overlay" id="alertModal" style="z-index: 2500;">
+        <div class="modal" style="text-align:center; max-width: 320px;">
+            <i class="fa-solid fa-circle-exclamation" style="font-size: 3rem; color: var(--highlight-card, #ff9800); margin-bottom: 20px;"></i>
+            <h3 style="margin-top:0; margin-bottom: 15px;">Action Disabled</h3>
+            <p id="alertModalMessage" style="font-size: 0.95rem; margin-bottom: 25px; opacity: 0.8; line-height: 1.5; color: var(--text);"></p>
+            <button class="btn-sm" style="width: 100%; background: var(--primary); color: white; border: none; font-size: 1rem; padding: 10px; border-radius: 8px; cursor: pointer;" onclick="document.getElementById('alertModal').style.display='none'">Got It</button>
+        </div>
+    </div>
+
     <script>
         const daysName = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
         const monthsName = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -1453,12 +1621,16 @@
         let log = JSON.parse(localStorage.getItem('log_v3')) || {};
         let config = JSON.parse(localStorage.getItem('config_v4')) || {
             dark: true,
-            color: '#00ff00',
+            color: '#5b8e7d',
             highlightColor: '#ff9800',
             bg: null,
             card: null,
             text: null,
-            border: null
+            border: null,
+            habitColor: null, // Default to null to follow theme
+            highlightCardColor: null,
+            stickyColor: null,
+            cardTransparency: 0
         };
         let customTasks = JSON.parse(localStorage.getItem('custom_tasks_v1')) || {};
         let importantTasks = JSON.parse(localStorage.getItem('important_tasks_v1')) || {};
@@ -1469,6 +1641,8 @@
             quote: 'Make it happen.',
             clockQuote: 'I am continue , are you ?'
         };
+        let scheduledTasks = JSON.parse(localStorage.getItem('scheduled_tasks_v1')) || [];
+
 
         // Post-load data migrations
         tasks.forEach(t => {
@@ -1489,14 +1663,14 @@
             renderGrid();
             updateAnalytics();
             renderTodayHighlight();
-            renderTodayHighlight();
+            renderScheduledTasks();
             loadProfile();
             startClock();
         }
 
         // --- DATA PORTABILITY (SHAREABLE) ---
         function exportData() {
-            const dataStr = JSON.stringify({ tasks, log, config, customTasks, importantTasks, weeklyHabits, habitTemplates, userProfile }, null, 2);
+            const dataStr = JSON.stringify({ tasks, log, config, customTasks, importantTasks, weeklyHabits, habitTemplates, userProfile, scheduledTasks }, null, 2);
             const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
 
             const exportFileDefaultName = 'execution-pro-backup.json';
@@ -1523,6 +1697,7 @@
                         if (imported.weeklyHabits) weeklyHabits = imported.weeklyHabits;
                         if (imported.habitTemplates) habitTemplates = imported.habitTemplates;
                         if (imported.userProfile) userProfile = imported.userProfile;
+                        if (imported.scheduledTasks) scheduledTasks = imported.scheduledTasks;
                         save();
                         alert("Progress successfully imported!");
                         location.reload();
@@ -1537,6 +1712,21 @@
         }
 
         // --- LOGIC ---
+        function showAlert(msg) {
+            document.getElementById('alertModalMessage').innerText = msg;
+            document.getElementById('alertModal').style.display = 'flex';
+        }
+
+        function canModifyDate(dateKey) {
+            if (config.editAllDays) return true;
+            const today = new Date().toISOString().split('T')[0];
+            if (dateKey !== today) {
+                showAlert("Editing past or future tasks is currently disabled.\nEnable 'Allow Past/Future Edits' in Settings to change this.");
+                return false;
+            }
+            return true;
+        }
+
         function save() {
             localStorage.setItem('tasks_v3', JSON.stringify(tasks));
             localStorage.setItem('log_v3', JSON.stringify(log));
@@ -1546,6 +1736,7 @@
             localStorage.setItem('weekly_habits_v1', JSON.stringify(weeklyHabits));
             localStorage.setItem('habit_templates_v1', JSON.stringify(habitTemplates));
             localStorage.setItem('profile_v1', JSON.stringify(userProfile));
+            localStorage.setItem('scheduled_tasks_v1', JSON.stringify(scheduledTasks));
         }
 
         function addTask() {
@@ -1560,10 +1751,73 @@
         }
 
         function updateName(idx, val) { tasks[idx].name = val; save(); renderGrid(); }
+        function updateHabitTime(idx, val) { tasks[idx].time = val; save(); renderGrid(); }
+
+        // --- DRAG & DROP & OPTIONS ---
+        let dragIdx = null;
+
+        function handleDragStart(e, idx) {
+            dragIdx = idx;
+            e.target.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+        }
+
+        function handleDrop(e, targetIdx) {
+            e.preventDefault();
+            if (dragIdx === null || dragIdx === targetIdx) return;
+
+            const movedItem = tasks.splice(dragIdx, 1)[0];
+            tasks.splice(targetIdx, 0, movedItem);
+
+            save();
+            renderTable();
+            renderGrid();
+            updateAnalytics();
+        }
+
+        function handleDragEnd(e) {
+            e.target.classList.remove('dragging');
+            dragIdx = null;
+        }
+
+        function toggleOptionsMenu(e, idx) {
+            e.stopPropagation();
+            const allMenus = document.querySelectorAll('.options-menu');
+            const targetMenu = document.getElementById(`menu-${idx}`);
+            const isActive = targetMenu.classList.contains('active');
+
+            allMenus.forEach(m => m.classList.remove('active'));
+            if (!isActive) targetMenu.classList.add('active');
+        }
+
+        function toggleStar(idx) {
+            tasks[idx].starred = !tasks[idx].starred;
+            save(); renderTable(); renderGrid();
+        }
+
+        function triggerColorPicker(idx) {
+            document.getElementById(`picker-${idx}`).click();
+        }
+
+        function updateHabitColor(idx, color) {
+            tasks[idx].color = color;
+            save(); renderTable(); renderGrid();
+        }
+
+        // Close menus on click outside
+        window.addEventListener('click', () => {
+            document.querySelectorAll('.options-menu').forEach(m => m.classList.remove('active'));
+        });
 
         function toggleSchedule(tIdx, dIdx) { tasks[tIdx].schedule[dIdx] = !tasks[tIdx].schedule[dIdx]; save(); renderTable(); renderGrid(); updateAnalytics(); renderTodayHighlight(); }
 
         function toggleLog(dateKey, taskId) {
+            if (!canModifyDate(dateKey)) return;
             if (!log[dateKey]) log[dateKey] = {};
             log[dateKey][taskId] = !log[dateKey][taskId];
             save(); renderGrid(); renderTable(); updateAnalytics(); renderTodayHighlight();
@@ -1580,6 +1834,7 @@
 
         // --- CUSTOM TASKS LOGIC ---
         function addCustomTask(dateKey) {
+            if (!canModifyDate(dateKey)) return;
             targetDateKey = dateKey;
             taskMode = 'custom';
             document.getElementById('taskInputModal').querySelector('h3').innerText = "Add Custom Task";
@@ -1601,6 +1856,7 @@
         });
 
         function toggleCustomTask(dateKey, taskId) {
+            if (!canModifyDate(dateKey)) return;
             if (!customTasks[dateKey]) return;
             const task = customTasks[dateKey].find(t => t.id === taskId);
             if (task) {
@@ -1610,6 +1866,7 @@
         }
 
         function removeCustomTask(dateKey, taskId) {
+            if (!canModifyDate(dateKey)) return;
             if (!customTasks[dateKey]) return;
             if (!confirm("Remove this custom task?")) return;
 
@@ -1726,11 +1983,17 @@
             }
 
             tasks.forEach((t, ti) => {
-                if (t.deletedDate) return; // Only show active habits in manager
+                if (t.deletedDate) return;
 
                 const adherence = getHabitAdherence(t.id, start, end);
-                let row = `<tr>
-                    <td><input class="task-input" value="${t.name}" oninput="updateName(${ti}, this.value)"></td>`;
+                let row = `<tr class="habit-row" draggable="true" ondragstart="handleDragStart(event, ${ti})" ondragover="handleDragOver(event)" ondrop="handleDrop(event, ${ti})" ondragend="handleDragEnd(event)">
+                    <td class="drag-handle"><i class="fa-solid fa-grip-vertical"></i></td>
+                    <td style="text-align:left; position:relative;">
+                        <div style="display:flex; align-items:center;">
+                            ${t.starred ? '<i class="fa-solid fa-star task-star"></i>' : ''}
+                            <input class="task-input" value="${t.name}" oninput="updateName(${ti}, this.value)" style="${t.color ? `color:${t.color}; font-weight:bold;` : ''}">
+                        </div>
+                    </td>`;
                 for (let di = 0; di < 7; di++) row += `<td><input type="checkbox" ${t.schedule[di] ? 'checked' : ''} onchange="toggleSchedule(${ti}, ${di})"></td>`;
                 row += `<td>
                         <div class="adherence-text">${adherence}%</div>
@@ -1738,7 +2001,26 @@
                             <div class="adherence-fill" style="width: ${adherence}%"></div>
                         </div>
                     </td>`;
-                row += `<td><button onclick="delTask(${ti})" style="background:none; border:none; color:#ff5f5f; cursor:pointer;"><i class="fa-solid fa-trash-can"></i></button></td></tr>`;
+                row += `<td><input type="time" class="task-input" value="${t.time || ''}" onchange="updateHabitTime(${ti}, this.value)" style="font-size:0.8rem; padding: 2px;"></td>`;
+                row += `<td style="position:relative;">
+                    <div class="options-dropdown">
+                        <button class="btn-sm" style="background:none; border:none; color:var(--text); cursor:pointer;" onclick="toggleOptionsMenu(event, ${ti})">
+                            <i class="fa-solid fa-ellipsis-vertical"></i>
+                        </button>
+                        <div id="menu-${ti}" class="options-menu">
+                            <div class="option-item" onclick="toggleStar(${ti})">
+                                <i class="fa-solid fa-star" style="color:#ffd700"></i> ${t.starred ? 'Remove Star' : 'Mark Important'}
+                            </div>
+                            <div class="option-item" onclick="triggerColorPicker(${ti})">
+                                <i class="fa-solid fa-palette"></i> Change Habit Color
+                            </div>
+                            <div class="option-item" onclick="delTask(${ti})" style="color:#ff5f5f;">
+                                <i class="fa-solid fa-trash-can"></i> Delete
+                            </div>
+                        </div>
+                        <input type="color" id="picker-${ti}" style="display:none;" oninput="updateHabitColor(${ti}, this.value)">
+                    </div>
+                </td></tr>`;
                 b.innerHTML += row;
             });
         }
@@ -1806,7 +2088,13 @@
                         if (isDone) done++;
                         html += `<li class="task-item" onclick="toggleLog('${dateKey}', '${t.id}')">
                         <input type="checkbox" ${isDone ? 'checked' : ''}>
-                        <span class="${isDone ? 'done' : ''}">${t.name}</span>
+                        <div style="display:flex; flex-direction:column;">
+                            <div style="display:flex; align-items:center;">
+                                ${t.starred ? '<i class="fa-solid fa-star task-star" style="font-size:0.7rem; color:#ffd700;"></i>' : ''}
+                                <span class="${isDone ? 'done' : ''}" style="${t.color ? `color:${t.color}; font-weight:bold;` : ''}">${t.name}</span>
+                            </div>
+                            ${t.time ? `<small style="font-size:0.65rem; opacity:0.6; color:var(--primary); font-family:Orbitron, sans-serif;">${t.time}</small>` : ''}
+                        </div>
                     </li>`;
                     }
                 });
@@ -1842,6 +2130,8 @@
                         }
                     });
                 }
+
+
 
                 let pct = total ? Math.round((done / total) * 100) : 0;
                 let offset = 157 - (pct / 100 * 157);
@@ -1931,6 +2221,7 @@
                 });
             }
 
+
             return total ? Math.round((done / total) * 100) : 0;
         }
 
@@ -1939,6 +2230,7 @@
         function changeWeek(dir) { viewDate.setDate(viewDate.getDate() + (dir * 7)); renderGrid(); updateAnalytics(); }
         function toggleModal(s) { document.getElementById('modal').style.display = s ? 'flex' : 'none'; }
         function setDarkMode() { config.dark = !config.dark; applySettings(); }
+        function toggleEditAllDays() { config.editAllDays = !config.editAllDays; applySettings(); }
         function setThemeColor(c) { config.color = c; applySettings(); }
         function setHighlightColor(c) { config.highlightColor = c; applySettings(); }
 
@@ -1953,14 +2245,20 @@
             config.card = null;
             config.text = null;
             config.border = null;
+            config.habitColor = null;
+            config.highlightCardColor = null;
+            config.stickyColor = null;
+            config.cardTransparency = 0;
             applySettings();
         }
 
         function applySettings() {
             document.body.className = config.dark ? 'dark-mode' : '';
             document.getElementById('darkToggle').checked = config.dark;
+            if (document.getElementById('editAllDaysToggle')) document.getElementById('editAllDaysToggle').checked = !!config.editAllDays;
+            
             document.getElementById('colorPicker').value = config.color;
-            if (document.getElementById('highlightPicker')) document.getElementById('highlightPicker').value = config.highlightColor || '#ff9800';
+            if (document.getElementById('highlightPicker')) document.getElementById('highlightPicker').value = config.highlightCardColor || '#ff9800';
 
             // Set basic theme colors
             document.documentElement.style.setProperty('--primary', config.color);
@@ -1981,11 +2279,36 @@
             if (config.border) document.documentElement.style.setProperty('--border', config.border);
             else document.documentElement.style.removeProperty('--border');
 
+            // Card-specific background variables
+            const transValue = (config.cardTransparency || 0);
+            const cardBase = config.card || (config.dark ? '#1e1e1e' : '#ffffff');
+            
+            const getTColor = (cBase) => `color-mix(in srgb, ${cBase}, transparent ${transValue}%)`;
+
+            document.documentElement.style.setProperty('--habit-color', config.habitColor || config.color || '#5b8e7d');
+            document.documentElement.style.setProperty('--highlight-card', config.highlightCardColor || config.highlightColor || '#ff9800');
+            document.documentElement.style.setProperty('--sticky-color', config.stickyColor || '#00bcd4');
+
+            // Set main translucent backgrounds
+            document.documentElement.style.setProperty('--card-bg', getTColor(cardBase));
+            document.documentElement.style.setProperty('--habit-bg', getTColor(config.habitColor || cardBase));
+            document.documentElement.style.setProperty('--highlight-bg', getTColor(config.highlightCardColor || cardBase));
+            document.documentElement.style.setProperty('--sticky-bg', getTColor(config.stickyColor || cardBase));
+
+            // Set main highlight if changed
+            document.documentElement.style.setProperty('--highlight', config.highlightColor || '#ff9800');
+            document.documentElement.style.setProperty('--card-transparency', transValue + '%');
+
             // Update Advanced Color Picker values
-            if (document.getElementById('bgPicker')) document.getElementById('bgPicker').value = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#f4f7f6';
-            if (document.getElementById('cardPicker')) document.getElementById('cardPicker').value = getComputedStyle(document.documentElement).getPropertyValue('--card').trim() || '#ffffff';
-            if (document.getElementById('textPicker')) document.getElementById('textPicker').value = getComputedStyle(document.documentElement).getPropertyValue('--text').trim() || '#333333';
-            if (document.getElementById('borderPicker')) document.getElementById('borderPicker').value = getComputedStyle(document.documentElement).getPropertyValue('--border').trim() || '#dddddd';
+            if (document.getElementById('bgPicker')) document.getElementById('bgPicker').value = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || (config.dark ? '#121212' : '#f4f7f6');
+            if (document.getElementById('cardPicker')) document.getElementById('cardPicker').value = cardBase;
+            if (document.getElementById('textPicker')) document.getElementById('textPicker').value = config.text || (config.dark ? '#e0e0e0' : '#333333');
+            if (document.getElementById('borderPicker')) document.getElementById('borderPicker').value = config.border || (config.dark ? '#333' : '#ddd');
+            if (document.getElementById('stickyPicker')) document.getElementById('stickyPicker').value = config.stickyColor || '#00bcd4';
+            if (document.getElementById('habitPicker')) document.getElementById('habitPicker').value = config.habitColor || config.color || '#5b8e7d';
+            if (document.getElementById('highlightPicker')) document.getElementById('highlightPicker').value = config.highlightCardColor || '#ff9800';
+            if (document.getElementById('cardTransparency')) document.getElementById('cardTransparency').value = transValue;
+            if (document.getElementById('transparencyValue')) document.getElementById('transparencyValue').innerText = transValue + '%';
 
             if (chart) { chart.data.datasets[0].borderColor = config.color; chart.data.datasets[0].backgroundColor = config.color + '22'; chart.update(); }
 
@@ -2026,9 +2349,10 @@
         }
 
         function addTodayTask() {
+            const dateKey = selectedHighlightDate;
+            if (!canModifyDate(dateKey)) return;
             const name = document.getElementById('todayTaskInput').value;
             if (!name) return;
-            const dateKey = selectedHighlightDate;
             if (!importantTasks[dateKey]) importantTasks[dateKey] = [];
 
             importantTasks[dateKey].push({
@@ -2042,6 +2366,7 @@
         }
 
         function toggleImportantTask(dateKey, taskId) {
+            if (!canModifyDate(dateKey)) return;
             if (!importantTasks[dateKey]) return;
             const task = importantTasks[dateKey].find(t => t.id === taskId);
             if (task) {
@@ -2051,6 +2376,7 @@
         }
 
         function removeImportantTask(dateKey, taskId) {
+            if (!canModifyDate(dateKey)) return;
             if (!importantTasks[dateKey]) return;
             if (!confirm("Remove this important task?")) return;
 
@@ -2111,7 +2437,105 @@
             });
         }
 
-        // Create "Add Weekly Task" Modal logic or prompt
+        const scheduledInput = document.getElementById('scheduledTaskInput');
+        if (scheduledInput) {
+            scheduledInput.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') addScheduledTask();
+            });
+        }
+
+
+// --- SCHEDULED TASKS LOGIC ---
+function toggleScheduledRangeVisibility() {
+    const mode = document.getElementById('scheduledTaskMode').value;
+    document.getElementById('scheduledRangeInputs').style.display = (mode === 'range') ? 'flex' : 'none';
+}
+
+function addScheduledTask() {
+    const name = document.getElementById('scheduledTaskInput').value.trim();
+    if (!name) return;
+
+    const mode = document.getElementById('scheduledTaskMode').value;
+    const start = document.getElementById('schedStart').value;
+    const end = document.getElementById('schedEnd').value;
+
+    const newTask = {
+        id: 'sch_' + Date.now(),
+        name: name,
+        mode: mode, // 'forever' or 'range'
+        startDate: mode === 'range' ? (start || new Date().toISOString().split('T')[0]) : null,
+        endDate: mode === 'range' ? (end || null) : null,
+        doneDates: {}, // key: dateKey, value: true/false
+        archived: false
+    };
+
+    scheduledTasks.push(newTask);
+    document.getElementById('scheduledTaskInput').value = '';
+    save();
+    renderScheduledTasks();
+}
+
+
+function deleteScheduledTask(taskId) {
+    if (!confirm("Remove this planned task? It will be archived and hidden from future days.")) return;
+    const task = scheduledTasks.find(t => t.id === taskId);
+    if (!task) return;
+
+    task.archived = true;
+    task.archivedDate = new Date().toISOString().split('T')[0];
+    save();
+    renderScheduledTasks();
+}
+
+function renderScheduledTasks() {
+    const list = document.getElementById('scheduledTaskList');
+    if (!list) return;
+
+    const dateKey = selectedHighlightDate;
+    list.innerHTML = '';
+
+    const activeTasks = scheduledTasks.filter(t => {
+        if (t.archived) {
+            // If archived, only show on days BEFORE it was archived
+            return dateKey < t.archivedDate;
+        }
+        if (t.mode === 'forever') return true;
+        if (t.mode === 'range') {
+            const start = t.startDate || '0000-00-00';
+            const end = t.endDate || '9999-12-31';
+            return dateKey >= start && dateKey <= end;
+        }
+        return false;
+    });
+
+    if (activeTasks.length > 0) {
+        activeTasks.forEach(t => {
+            const isDoneOnDate = t.doneDates[dateKey] || false;
+            list.innerHTML += `<li class="task-item" style="border-left: 2px solid var(--sticky-color); background: var(--bg);">
+                <div onclick="toggleScheduledTaskOnDate('${t.id}', '${dateKey}')" style="display:flex; align-items:center; flex-grow:1;">
+                    <input type="checkbox" ${isDoneOnDate ? 'checked' : ''}>
+                    <div style="display:flex; flex-direction:column; margin-left:10px;">
+                        <span class="${isDoneOnDate ? 'done' : ''}" style="font-size:1rem;">${t.name}</span>
+                        ${t.mode === 'range' ? `<small style="font-size:0.65rem; opacity:0.6;">Until ${t.endDate || 'Forever'}</small>` : ''}
+                    </div>
+                </div>
+                <button onclick="deleteScheduledTask('${t.id}')" style="background:none; border:none; color:#ff5f5f; cursor:pointer;"><i class="fa-solid fa-trash-can"></i></button>
+            </li>`;
+        });
+    } else {
+        list.innerHTML = `<div style="text-align:center; opacity:0.6; padding:20px;">No planned tasks for ${dateKey === new Date().toISOString().split('T')[0] ? 'today' : 'this day'}.</div>`;
+    }
+}
+
+function toggleScheduledTaskOnDate(taskId, dateKey) {
+    if (!canModifyDate(dateKey)) return;
+    const task = scheduledTasks.find(t => t.id === taskId);
+    if (!task) return;
+
+    task.doneDates[dateKey] = !task.doneDates[dateKey];
+    save();
+    renderScheduledTasks();
+}
         let taskMode = 'custom'; // 'custom' or 'weekly'
 
         function addWeeklyTask() {
